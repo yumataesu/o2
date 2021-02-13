@@ -6,6 +6,7 @@ use glutin::event::{ElementState, Event, KeyboardInput, VirtualKeyCode, WindowEv
 use glutin::event_loop::{ControlFlow, EventLoop};
 use glutin::window::WindowBuilder;
 use glutin::ContextBuilder;
+use image::imageops::replace;
 use rand::Rng;
 
 //ここを読む
@@ -22,27 +23,74 @@ impl App {
     }
 }
 
-fn test(num : f64) {
+pub struct Data {
+    idx : i64,
+}
+
+fn changeInt(num : &mut f64) {
+    *num += 123.0;
     print!("{}", num);
 }
 
-fn teststr(str : &String) {
+fn getNum() -> i32 {
+    22222
+}
+
+
+fn culcScore(raw_score : f32) -> f32 {
+    raw_score / 10.0
+}
+
+
+fn showName(str : &mut String) {
+    *str = String::from("asai");
     print!("{}", str);
 }
 
-fn test2(num : f64) {
-    print!("{}", num);
+fn replaceName(name : &mut String) -> &String {
+    *name = String::from(" waaaaai");
+    name
+}
+
+fn changeData(d : &mut Data) {
+    d.idx += 21;
+    println!("{}", d.idx);
 }
 
 fn main() {
-    let a : f64 = 123487.2;
-    let sss : String = String::from("dfsafdsadfsa");
-    println!("=============");
-    test(a);
-    println!("{}", a);
-    println!("=============");
-    teststr(&sss);
-    println!("{}", sss);
+    let mut a : f64 = 123487.2;
+    
+    let raw_score : f32 = 123.0;
+    let result = culcScore(raw_score);
+    println!("{}", result);
+    println!("{}", raw_score);
+    
+    let mut author_name : String = String::from("souseki natsume");
+    showName(&mut author_name);
+    let new_name = replaceName(&mut author_name);
+    println!("{}", new_name);
+    println!("{}", author_name);
+
+    // showName(author_name);
+
+    // println!("=============");
+    // changeInt(&mut a);
+    // println!("=============");
+
+    // changeInt(&mut a);
+
+    // // changeInt(a);
+
+    // println!("{}", a);
+    // println!("=============");
+    // teststr(&sss);
+    // println!("{}", sss);
+
+    // let mut data = Data{idx:999};
+    // changeData(&mut data);
+    // changeData(&mut data);
+
+    // getData(&data);
 
     // app.setup();
     let fps : f64 = 60.0;
