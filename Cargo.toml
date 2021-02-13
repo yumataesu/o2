@@ -3,7 +3,6 @@ name = "tasktest"
 version = "0.1.0"
 authors = ["YumaTaesu <yuma.taesu@gmail.com>"]
 edition = "2018"
-
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
@@ -17,3 +16,4 @@ libc = "*"
 
 [build-dependencies]
 gl_generator = "0.14"
+
