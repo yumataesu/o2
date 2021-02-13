@@ -60,6 +60,7 @@ fn changeData(d : &mut Data) {
 fn main() {
     let mut a : f64 = 123487.2;
     
+    
     let raw_score : f32 = 123.0;
     let result = culcScore(raw_score);
     println!("{}", result);
