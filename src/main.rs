@@ -52,6 +52,13 @@ fn replaceName(name : &mut String) -> &String {
     name
 }
 
+fn appendName(name : &String) -> String {
+    let last_name = "mouri".to_string();
+    let mut new_name = name.clone() + &last_name;
+    new_name
+    // n
+}
+
 fn changeData(d : &mut Data) {
     d.idx += 21;
     println!("{}", d.idx);
@@ -72,6 +79,15 @@ fn main() {
     println!("{}", new_name);
     println!("{}", author_name);
 
+
+
+    let id = "id";
+    let name = "name".to_string();
+    let age = String::from("43");
+    let mut misc = String::new();
+    misc = "misc".to_string();
+
+    let mut joined = age + &name;
     // showName(author_name);
 
     // println!("=============");
