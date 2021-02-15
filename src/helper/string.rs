@@ -1,6 +1,5 @@
 
-
-pub fn StringJoinString() {
+pub fn join_string_to_string() {
     let mut a = "Yuma".to_string();
     let mut b = String::from("Taesu");
 

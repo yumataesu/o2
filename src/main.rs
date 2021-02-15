@@ -100,7 +100,7 @@ fn main() {
 
 
     //String と Stringの連結について
-    helper::string::StringJoinString();
+    helper::string::join_string_to_string();
 
     // showName(author_name);
 
