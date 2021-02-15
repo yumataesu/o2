@@ -6,3 +6,4 @@ pub use std::ffi::CStr;
 
 pub mod draw;
 pub mod util;
+pub mod string;

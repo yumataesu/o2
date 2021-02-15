@@ -81,6 +81,10 @@ fn main() {
 
 
 
+    //st
+    
+    let udid : i64 = 0;
+    let score : f64 = 0.546;
     let id = "id";
     let name = "name".to_string();
     let age = String::from("43");
@@ -88,6 +92,16 @@ fn main() {
     misc = "misc".to_string();
 
     let mut joined = age + &name;
+
+    let test = "test";
+    // let mut ddd = id.to_string() + &test;
+    let comcated = format!("{}, {}, {}", id, score, name);
+    println!("{}", comcated);
+
+
+    //String と Stringの連結について
+    helper::string::StringJoinString();
+
     // showName(author_name);
 
     // println!("=============");
