@@ -101,6 +101,16 @@ fn main() {
 
     //String と Stringの連結について
     helper::string::join_string_to_string();
+    helper::string::join_strref_to_strref();
+
+    let a = "abc";
+    let b = "ab";
+    if helper::string::starts_with(&a, &b) {
+        println!("has words");
+    }
+    else {
+        println!("no words found");
+    }
 
     // showName(author_name);
 
