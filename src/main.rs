@@ -112,6 +112,14 @@ fn main() {
         println!("no words found");
     }
 
+    if helper::string::is_phone_number("000-1234-7362") {
+        println!("is_phone_number");
+    }
+    else {
+        println!("not phone number");
+    }
+
+
     // showName(author_name);
 
     // println!("=============");

@@ -1,3 +1,4 @@
+use regex::Regex;
 
 pub fn join_string_to_string() {
     let mut a = "Yuma".to_string();
@@ -28,3 +29,8 @@ pub fn starts_with(a : &str, b : &str) -> bool {
     a.starts_with(b)
 }
 
+//https://murashun.jp/article/programming/regular-expression.html
+pub fn is_phone_number(a : &str) -> bool {
+    let re = Regex::new(r"\d{3}-\d{4}-\d{4}$").unwrap();
+    re.is_match(a)
+}
