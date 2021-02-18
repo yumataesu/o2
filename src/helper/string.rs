@@ -1,5 +1,13 @@
 use regex::Regex;
 
+// let udid : i64 = 0;
+// let score : f64 = 0.546;
+// let id = "id";
+// let name = "name".to_string();
+// let age = String::from("43");
+// let mut misc = String::new();
+// misc = "misc".to_string();
+
 pub fn join_string_to_string() {
     let mut a = "Yuma".to_string();
     let mut b = String::from("Taesu");

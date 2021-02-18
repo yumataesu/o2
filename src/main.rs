@@ -9,73 +9,7 @@ use glutin::ContextBuilder;
 use image::imageops::replace;
 use rand::Rng;
 
-//ここを読む
-//https://doc.rust-jp.rs/book-ja/ch15-01-box.html
-// #[derive(Copy, Clone)]
-
-struct App {
-    pub event: EventLoop<()>,
-    pub wb: WindowBuilder,
-}
-
-impl App {
-    pub fn new() -> Self {
-        App {event: EventLoop::new(), wb : WindowBuilder::new()}
-    }
-
-    #[inline]
-    pub fn with_title<T: Into<String>>(mut self, title: T) -> WindowBuilder {
-        self.wb.window.title = title.into();
-        self.wb
-    }
-
-    #[inline]
-    pub fn with_inner_size<S: Into<Size>>(mut self, size: S) -> WindowBuilder {
-        self.wb.window.inner_size = Some(size.into());
-        self.wb
-    }
-
-    #[inline]
-    pub fn with_min_inner_size<S: Into<Size>>(mut self, min_size: S) -> WindowBuilder {
-        self.wb.window.min_inner_size = Some(min_size.into());
-        self.wb
-    }
-
-    #[inline]
-    pub fn with_decorations(mut self, decorations: bool) -> WindowBuilder {
-        self.wb.window.decorations = decorations;
-        self.wb
-    }
-    
-    #[inline]
-    pub fn with_resizable(mut self, resizable: bool) -> WindowBuilder {
-        self.wb.window.resizable = resizable;
-        self.wb
-    }
-
-    #[inline]
-    pub fn with_transparent(mut self, transparent: bool) -> WindowBuilder {
-        self.wb.window.transparent = transparent;
-        self.wb
-    }
-
-    #[inline]
-    pub fn with_always_on_top(mut self, always_on_top: bool) -> WindowBuilder {
-        self.wb.with_always_on_top(always_on_top)
-    }
-
-    pub fn setup() {
-
-    }
-
-    pub fn update() {
-
-    }
-
-    pub fn draw() {
-
-    }
-}
+mod app;
 
 pub struct Data {
     idx : i64,
@@ -136,13 +70,7 @@ fn main() {
 
     //st
     
-    let udid : i64 = 0;
-    let score : f64 = 0.546;
-    let id = "id";
-    let name = "name".to_string();
-    let age = String::from("43");
-    let mut misc = String::new();
-    misc = "misc".to_string();
+
 
     //String と Stringの連結について
     helper::string::join_string_to_string();
@@ -164,16 +92,16 @@ fn main() {
         println!("not phone number");
     }
 
-    let app = App::new();
-    app.with_always_on_top(false)
-        .with_title("My Rust Window")
-        .with_decorations(false)
-        .with_resizable(false)
-        .with_always_on_top(false)
-        .with_transparent(true)
-        .with_inner_size(PhysicalSize::new(512, 512))
-        .with_min_inner_size(PhysicalSize::new(256, 256));
+    let mut app = app::App::new();
+    // app.with_title("My Rust Window")
+    //     .with_decorations(false)
+    //     .with_resizable(false)
+    //     // .with_always_on_top(false)
+    //     .with_transparent(true)
+    //     .with_inner_size(PhysicalSize::new(512, 512))
+    //     .with_min_inner_size(PhysicalSize::new(256, 256));
 
+    app.create_gl_context();
 
     let fps : f64 = 60.0;
     let el = EventLoop::new();
