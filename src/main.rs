@@ -1,21 +1,15 @@
 #![allow(dead_code)]
 
-
 mod helper;
-use std::fs;
-use std::mem;
 
-use glutin::dpi::*;
+use glutin::{ContextWrapper, PossiblyCurrent, dpi::*};
 use glutin::event::{ElementState, Event, KeyboardInput, VirtualKeyCode, WindowEvent};
 use glutin::event_loop::{ControlFlow, EventLoop};
 use glutin::window::WindowBuilder;
 use glutin::ContextBuilder;
-use image::imageops::replace;
-use rand::Rng;
-
+// use rand::Rng;
 // mod base_app;
 // mod app;
-
 
 pub struct WindowSetting {
     title: String,
@@ -44,7 +38,6 @@ impl WindowSetting {
 
 
 pub trait BaseApp {
-    // fn new() -> Self;
     fn setup(&self);
     fn update(&self);
     fn draw(&self);
@@ -83,22 +76,128 @@ impl BaseApp for App {
 }
 
 struct Runner<'a> {
-    app : &'a App
+    app : &'a App,
+    event: EventLoop<()>,
+    windowed_context: ContextWrapper<PossiblyCurrent, glutin::window::Window>,
+    frame_rate : f64,
+    last_time: std::time::Instant
 }
 
 
-impl<'a> Runner<'a> {
-    pub fn run(&mut self) {
-        &self.app.setup();
+impl<'_> Runner<'_> {
+    pub fn new(app: &'a App) -> Self {
+        let el = EventLoop::new();
+        let wb = WindowBuilder::new()
+                .with_title("My Window")
+                .with_decorations(false)
+                .with_resizable(false)
+                .with_always_on_top(false)
+                .with_transparent(true)
+                .with_inner_size(PhysicalSize::new(512, 512))
+                .with_min_inner_size(PhysicalSize::new(256, 256));
+
+        let windowed_context = ContextBuilder::new()
+                    .with_gl(glutin::GlRequest::Latest)
+                    .build_windowed(wb, &el).unwrap();
+        let windowed_context = unsafe { windowed_context.make_current().unwrap() };
+
+        println!("Pixel format of the window's GL context: {:?}", windowed_context.get_pixel_format());
+
+        let gl_context = windowed_context.context();
+        let _gl = gl::load_with(|ptr| gl_context.get_proc_address(ptr) as *const _);
+
+        let version = unsafe {
+            let data = helper::CStr::from_ptr(gl::GetString(gl::VERSION) as *const _)
+                .to_bytes()
+                .to_vec();
+            String::from_utf8(data).unwrap()
+        };
+        println!("OpenGL version {}", version);
+
+
+
+        app.setup();
+        Runner { app : app, event: el, windowed_context: windowed_context, frame_rate: 60.0, last_time: std::time::Instant::now() }
+    }
+    pub fn run(self) {
+        self.event.run(move | event, _, control_flow | {
+            match self.event {
+            //         Event::WindowEvent{event, ..} =>
+            //         match event {
+            //             WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
+            //             WindowEvent::KeyboardInput{input: KeyboardInput { virtual_keycode: Some(virtual_code), state, .. }, ..} => 
+            //             match state {
+            //                 ElementState::Pressed => {
+            //                     match virtual_code {
+            //                         VirtualKeyCode::Escape => {
+            //                             *control_flow = ControlFlow::Exit;
+            //                         },
+            //                         VirtualKeyCode::Left | VirtualKeyCode::Down | VirtualKeyCode::Right | VirtualKeyCode::Up => {
+            //                             let p = self.windowed_context.window().outer_position();
+            //                             let x = p.clone().unwrap().x;
+            //                             let y = p.clone().unwrap().y;
+            //                             let mut new = PhysicalPosition::new(0, 0);
+            //                             let offset = 10;
+            //                             if virtual_code == VirtualKeyCode::Left {
+            //                                 new = PhysicalPosition::new(x - offset, y);
+            //                             } else if virtual_code == VirtualKeyCode::Down {
+            //                                 new = PhysicalPosition::new(x, y + offset);
+            //                             } else if virtual_code == VirtualKeyCode::Right {
+            //                                 new = PhysicalPosition::new(x + offset, y);
+            //                             } else if virtual_code == VirtualKeyCode::Up {
+            //                                 new = PhysicalPosition::new(x, y - offset);
+            //                             }
+            //                             self.windowed_context.window().set_outer_position(new);
+            //                         },
+            //                         _ => ()
+            //                     }
+            //                 },
+            //                 ElementState::Released => {
+    
+            //                 }
+            //             }
+            //             _ =>()
+            //     }
+            //     Event::MainEventsCleared => {
+            //         self.last_time = std::time::Instant::now();
+            //         let millisec_at_fps = std::time::Duration::from_millis((1.0 / self.frame_rate * 1000.0) as u64);
+
+            //         self.app.update();
+    
+            //         self.windowed_context.window().request_redraw();
+    
+            //         let duration = std::time::Instant::now().duration_since(self.last_time);
+            //         if duration < millisec_at_fps {
+            //             std::thread::sleep(millisec_at_fps - duration);
+            //         }
+            //     },
+            //     Event::RedrawRequested(_) => {
+            //         self.app.draw();
+            //         // unsafe {
+
+            //         //     gl::ClearColor(n, n, n, 1.0);
+            //         //     gl::Clear(gl::COLOR_BUFFER_BIT);
+    
+            //         //     // gl::UseProgram(program);
+            //         //     // gl::BindVertexArray(vao);
+            //         //     // gl::DrawArrays(gl::TRIANGLES, 0, 3);
+            //         //     // gl::BindVertexArray(0);
+            //         //     // gl::UseProgram(0);
+            //         // }
+            //         self.windowed_context.swap_buffers().unwrap();
+            //     }
+            //     _ => *control_flow = ControlFlow::Poll
+            }
+        });
     }
 }
-
 
 fn main() {
     let mut window_setting = WindowSetting::new();
     window_setting.has_transparent = false;
 
-    Runner{app : &App::default()}.run();
+    Runner::new(&App::default()).run();
+}
 
     // Runner{ app : &app::App::default() };
     //let mut window_setting : windowSetting;
@@ -148,41 +247,41 @@ fn main() {
 
     //app.create_gl_context();
 
-    let fps : f64 = 60.0;
-    let el = EventLoop::new();
-    let wb = WindowBuilder::new()
-                .with_title("My Window")
-                .with_decorations(false)
-                .with_resizable(false)
-                .with_always_on_top(false)
-                .with_transparent(true)
-                .with_inner_size(PhysicalSize::new(512, 512))
-                .with_min_inner_size(PhysicalSize::new(256, 256));
+    // let fps : f64 = 60.0;
+    // let el = EventLoop::new();
+    // let wb = WindowBuilder::new()
+    //             .with_title("My Window")
+    //             .with_decorations(false)
+    //             .with_resizable(false)
+    //             .with_always_on_top(false)
+    //             .with_transparent(true)
+    //             .with_inner_size(PhysicalSize::new(512, 512))
+    //             .with_min_inner_size(PhysicalSize::new(256, 256));
 
-    let windowed_context = ContextBuilder::new()
-                .with_gl(glutin::GlRequest::Latest)
-                .build_windowed(wb, &el).unwrap();
-    let windowed_context = unsafe { windowed_context.make_current().unwrap() };
+    // let windowed_context = ContextBuilder::new()
+    //             .with_gl(glutin::GlRequest::Latest)
+    //             .build_windowed(wb, &el).unwrap();
+    // let windowed_context = unsafe { windowed_context.make_current().unwrap() };
 
-    println!("Pixel format of the window's GL context: {:?}", windowed_context.get_pixel_format());
+    // println!("Pixel format of the window's GL context: {:?}", windowed_context.get_pixel_format());
 
-    let gl_context = windowed_context.context();
-    let _gl = gl::load_with(|ptr| gl_context.get_proc_address(ptr) as *const _);
+    // let gl_context = windowed_context.context();
+    // let _gl = gl::load_with(|ptr| gl_context.get_proc_address(ptr) as *const _);
 
-    let version = unsafe {
-        let data = helper::CStr::from_ptr(gl::GetString(gl::VERSION) as *const _)
-            .to_bytes()
-            .to_vec();
-        String::from_utf8(data).unwrap()
-    };
+    // let version = unsafe {
+    //     let data = helper::CStr::from_ptr(gl::GetString(gl::VERSION) as *const _)
+    //         .to_bytes()
+    //         .to_vec();
+    //     String::from_utf8(data).unwrap()
+    // };
 
-    println!("OpenGL version {}", version);
+    // println!("OpenGL version {}", version);
 
 
-    let mut last = std::time::Instant::now();
-    let millisec_at_fps = std::time::Duration::from_millis((1.0 / fps * 1000.0) as u64);
-    let mut rng = rand::thread_rng();
-    let mut n : f32 = 0.0;
+    // let mut last = std::time::Instant::now();
+    // let millisec_at_fps = std::time::Duration::from_millis((1.0 / fps * 1000.0) as u64);
+    // let mut rng = rand::thread_rng();
+    // let mut n : f32 = 0.0;
     // println!("{}", &helper::util::type_of(n));
 
 
@@ -252,7 +351,7 @@ fn main() {
     }*/
 
 
-
+/* 
     el.run(move | event, _, control_flow | {
         match event {
                 Event::WindowEvent{event, ..} =>
@@ -319,6 +418,6 @@ fn main() {
             _ => *control_flow = ControlFlow::Poll
         }
 
-    });
+    });*/
 
-}
+
