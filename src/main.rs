@@ -1,5 +1,6 @@
 mod helper;
 use std::fs;
+use std::mem;
 
 use glutin::dpi::*;
 use glutin::event::{ElementState, Event, KeyboardInput, VirtualKeyCode, WindowEvent};
@@ -11,66 +12,57 @@ use rand::Rng;
 
 mod app;
 
-pub struct Data {
-    idx : i64,
+pub trait App {
+    fn setup(&self);
+    // fn update(&self);
+    // fn draw(&self);
+    // fn key_pressed(&self);
+    // fn key_released(&self);
 }
 
-fn changeInt(num : &mut f64) {
-    *num += 123.0;
-    print!("{}", num);
-}
-
-fn getNum() -> i32 {
-    22222
-}
-
-
-fn culcScore(raw_score : f32) -> f32 {
-    raw_score / 10.0
+#[derive(Default, Clone, Debug)]
+struct MyData {
+    a : i32,
+    s : String
 }
 
 
-fn showName(str : &mut String) {
-    *str = String::from("asai");
-    print!("{}", str);
+impl App for MyData {
+    fn setup(&self) {
+        println!("setup");
+    }
 }
 
-fn replaceName(name : &mut String) -> &String {
-    *name = String::from(" waaaaai");
-    name
+
+impl MyData {
+    pub fn new() -> Self {
+        MyData::default()
+    }
+
+    pub fn test(&mut self) {
+        self.a = 32;
+        self.s = String::from("waaaaai");
+        println!("member method");
+    }
+
+    //selfがないとstatic methodになる
+    pub fn Test() {
+        println!("static method");
+    }
 }
 
-fn appendName(name : &String) -> String {
-    let last_name = "mouri".to_string();
-    let mut new_name = name.clone() + &last_name;
-    new_name
-    // n
-}
-
-fn changeData(d : &mut Data) {
-    d.idx += 21;
-    println!("{}", d.idx);
-}
 
 fn main() {
-    let mut a : f64 = 123487.2;
+    let mydata_on_stack = MyData::new();
+    let mut mydata_on_heap : Box<MyData> = Box::new(MyData::new());
     
+    mydata_on_heap.test();
+    MyData::Test();
+    mydata_on_heap.setup();
 
-    let raw_score : f32 = 123.0;
-    let result = culcScore(raw_score);
-    println!("{}", result);
-    println!("{}", raw_score);
-    
-    let mut author_name : String = String::from("souseki natsume");
-    showName(&mut author_name);
-    let new_name = replaceName(&mut author_name);
-    println!("{}", new_name);
-    println!("{}", author_name);
-
-
-    //st
-    
-
+    let mydata_on_heap2 = mydata_on_heap.clone();
+    println!("{:#?}", mydata_on_heap);
+    println!("{:#?}", mydata_on_heap2);
 
     //String と Stringの連結について
     helper::string::join_string_to_string();
@@ -93,15 +85,15 @@ fn main() {
     }
 
     let mut app = app::App::new();
-    // app.with_title("My Rust Window")
-    //     .with_decorations(false)
-    //     .with_resizable(false)
+    app.with_title("My Rust Window");
+    // app.with_resizable(false).with_always_on_top(false);
+    //     
     //     // .with_always_on_top(false)
     //     .with_transparent(true)
     //     .with_inner_size(PhysicalSize::new(512, 512))
     //     .with_min_inner_size(PhysicalSize::new(256, 256));
 
-    app.create_gl_context();
+    //app.create_gl_context();
 
     let fps : f64 = 60.0;
     let el = EventLoop::new();

@@ -9,7 +9,7 @@ use regex::Regex;
 // misc = "misc".to_string();
 
 pub fn join_string_to_string() {
-    let mut a = "Yuma".to_string();
+    let a = "Yuma".to_string();
     let mut b = String::from("Taesu");
 
     // let result1 = a + &b; //aにムーブが起きる
