@@ -12,11 +12,12 @@ use rand::Rng;
 
 mod app;
 
+
 pub trait App {
     fn setup(&self);
     // fn update(&self);
     // fn draw(&self);
-    // fn key_pressed(&self);
+    // fn key_pressed(&self, code);
     // fn key_released(&self);
 }
 

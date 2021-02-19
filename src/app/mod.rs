@@ -5,14 +5,42 @@ use glutin::window::WindowBuilder;
 use glutin::ContextBuilder;
 pub use std::ffi::CStr;
 
+
+
+pub struct WindowSetting {
+    title: String,
+    is_decoration: bool,
+    is_resizable: bool,
+    is_always_on_top: bool,
+    has_transparent: bool,
+    size: PhysicalSize<i32>,
+    minimum_size: PhysicalSize<i32>
+}
+
+//https://ifritjp.github.io/documents/rust/lifetime/
+impl WindowSetting {
+    pub fn new() -> Self {
+        WindowSetting {
+            title: String::from("default title"),
+            is_decoration: true,
+            is_resizable: false,
+            is_always_on_top: false,
+            has_transparent: false,
+            size: PhysicalSize::new(512, 512),
+            minimum_size: PhysicalSize::new(256, 256)
+        }
+    }
+}
+
+
 #[derive(Debug)]
-pub struct App {
-    event: EventLoop<()>,
+pub struct App<T: 'static> {
+    event: EventLoop<T>,
     wb: WindowBuilder,
     frame_rate : i32
 }
 
-impl App {
+impl App<()> {
     pub fn new() -> Self {
         App {event: EventLoop::new(), wb : WindowBuilder::new(), frame_rate: 60}
     }
