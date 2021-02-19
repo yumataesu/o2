@@ -1,3 +1,6 @@
+#![allow(dead_code)]
+
+
 mod helper;
 use std::fs;
 use std::mem;
@@ -10,83 +13,132 @@ use glutin::ContextBuilder;
 use image::imageops::replace;
 use rand::Rng;
 
-mod app;
+// mod base_app;
+// mod app;
 
 
-pub trait App {
+pub struct WindowSetting {
+    title: String,
+    is_decoration: bool,
+    is_resizable: bool,
+    is_always_on_top: bool,
+    has_transparent: bool,
+    size: PhysicalSize<i32>,
+    minimum_size: PhysicalSize<i32>
+}
+
+//https://ifritjp.github.io/documents/rust/lifetime/
+impl WindowSetting {
+    pub fn new() -> Self {
+        WindowSetting {
+            title: String::from("default title"),
+            is_decoration: true,
+            is_resizable: false,
+            is_always_on_top: false,
+            has_transparent: false,
+            size: PhysicalSize::new(512, 512),
+            minimum_size: PhysicalSize::new(256, 256)
+        }
+    }
+}
+
+
+pub trait BaseApp {
+    // fn new() -> Self;
     fn setup(&self);
-    // fn update(&self);
-    // fn draw(&self);
+    fn update(&self);
+    fn draw(&self);
     // fn key_pressed(&self, code);
     // fn key_released(&self);
 }
 
-#[derive(Default, Clone, Debug)]
-struct MyData {
-    a : i32,
-    s : String
+
+
+#[derive(Default)]
+pub struct App {
+    number: i32
 }
 
+impl App {
+    pub fn new() -> Self {
+        App{number: 123}
+    }
+}
 
-impl App for MyData {
+impl BaseApp for App {
+
     fn setup(&self) {
         println!("setup");
     }
+
+
+    fn update(&self) {
+        println!("update");
+    }
+
+
+    fn draw(&self) {
+        println!("draw");
+    }
+}
+
+struct Runner<'a> {
+    app : &'a App
 }
 
 
-impl MyData {
-    pub fn new() -> Self {
-        MyData::default()
-    }
-
-    pub fn test(&mut self) {
-        self.a = 32;
-        self.s = String::from("waaaaai");
-        println!("member method");
-    }
-
-    //selfがないとstatic methodになる
-    pub fn Test() {
-        println!("static method");
+impl<'a> Runner<'a> {
+    pub fn run(&mut self) {
+        &self.app.setup();
     }
 }
 
 
 fn main() {
-    let mydata_on_stack = MyData::new();
-    let mut mydata_on_heap : Box<MyData> = Box::new(MyData::new());
+    let mut window_setting = WindowSetting::new();
+    window_setting.has_transparent = false;
+
+    Runner{app : &App::default()}.run();
+
+    // Runner{ app : &app::App::default() };
+    //let mut window_setting : windowSetting;
+    //window_setting.fewafewafewa = fewafewa;
+    //Runner(app::App::new(window_setting)).run()
+
+    // let mydata_on_stack = MyData::new();
+    // let mut mydata_on_heap : Box<MyData> = Box::new(MyData::new());
     
-    mydata_on_heap.test();
-    MyData::Test();
-    mydata_on_heap.setup();
+    // mydata_on_heap.test();
+    // MyData::Test();
 
-    let mydata_on_heap2 = mydata_on_heap.clone();
-    println!("{:#?}", mydata_on_heap);
-    println!("{:#?}", mydata_on_heap2);
+    // let mydata_on_heap2 = mydata_on_heap.clone();
+    // println!("{:#?}", mydata_on_heap);
+    // println!("{:#?}", mydata_on_heap2);
 
-    //String と Stringの連結について
-    helper::string::join_string_to_string();
-    helper::string::join_strref_to_strref();
+    // //String と Stringの連結について
+    // helper::string::join_string_to_string();
+    // helper::string::join_strref_to_strref();
 
-    let a = "abc";
-    let b = "ab";
-    if helper::string::starts_with(&a, &b) {
-        println!("has words");
-    }
-    else {
-        println!("no words found");
-    }
+    // let a = "abc";
+    // let b = "ab";
+    // if helper::string::starts_with(&a, &b) {
+    //     println!("has words");
+    // }
+    // else {
+    //     println!("no words found");
+    // }
 
-    if helper::string::is_phone_number("000-1234-7362") {
-        println!("is_phone_number");
-    }
-    else {
-        println!("not phone number");
-    }
+    // if helper::string::is_phone_number("000-1234-7362") {
+    //     println!("is_phone_number");
+    // }
+    // else {
+    //     println!("not phone number");
+    // }
 
-    let mut app = app::App::new();
-    app.with_title("My Rust Window");
+    // let mut app = base_app::App::new();
+    // app.with_title("My Rust Window");
+
+    // let mut a : base_app::App<()> = app::App::new();
     // app.with_resizable(false).with_always_on_top(false);
     //     
     //     // .with_always_on_top(false)
@@ -133,6 +185,8 @@ fn main() {
     let mut n : f32 = 0.0;
     // println!("{}", &helper::util::type_of(n));
 
+
+    /*
     static VERTEX_DATA: [f32; 15] = [
         -0.5, -0.5,  1.0,  0.0,  0.0,
          0.0,  0.5,  0.0,  1.0,  0.0,
@@ -195,7 +249,7 @@ fn main() {
         gl::EnableVertexAttribArray(pos_attrib as gl::types::GLuint);
         gl::EnableVertexAttribArray(color_attrib as gl::types::GLuint);
         gl::BindVertexArray(0);
-    }
+    }*/
 
 
 
@@ -254,11 +308,11 @@ fn main() {
                     gl::ClearColor(n, n, n, 1.0);
                     gl::Clear(gl::COLOR_BUFFER_BIT);
 
-                    gl::UseProgram(program);
-                    gl::BindVertexArray(vao);
-                    gl::DrawArrays(gl::TRIANGLES, 0, 3);
-                    gl::BindVertexArray(0);
-                    gl::UseProgram(0);
+                    // gl::UseProgram(program);
+                    // gl::BindVertexArray(vao);
+                    // gl::DrawArrays(gl::TRIANGLES, 0, 3);
+                    // gl::BindVertexArray(0);
+                    // gl::UseProgram(0);
                 }
                 windowed_context.swap_buffers().unwrap();
             }
