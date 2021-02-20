@@ -7,6 +7,7 @@ use glutin::event::{ElementState, Event, KeyboardInput, VirtualKeyCode, WindowEv
 use glutin::event_loop::{ControlFlow, EventLoop};
 use glutin::window::WindowBuilder;
 use glutin::ContextBuilder;
+
 // use rand::Rng;
 // mod base_app;
 // mod app;
@@ -46,8 +47,7 @@ pub trait BaseApp {
 }
 
 
-
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct App {
     number: i32
 }
@@ -75,17 +75,18 @@ impl BaseApp for App {
     }
 }
 
-struct Runner<'a> {
-    app : &'a App,
-    event: EventLoop<()>,
+#[derive(Debug)]
+struct Runner<T: 'static> {
+    app : App,
+    el: EventLoop<T>,
     windowed_context: ContextWrapper<PossiblyCurrent, glutin::window::Window>,
     frame_rate : f64,
     last_time: std::time::Instant
 }
 
 
-impl<'_> Runner<'_> {
-    pub fn new(app: &'a App) -> Self {
+impl Runner<()> {
+    pub fn new(app: App) -> Self {
         let el = EventLoop::new();
         let wb = WindowBuilder::new()
                 .with_title("My Window")
@@ -114,89 +115,193 @@ impl<'_> Runner<'_> {
         };
         println!("OpenGL version {}", version);
 
-
-
         app.setup();
-        Runner { app : app, event: el, windowed_context: windowed_context, frame_rate: 60.0, last_time: std::time::Instant::now() }
+        Runner { app : app, el: el, windowed_context: windowed_context, frame_rate: 60.0, last_time: std::time::Instant::now() }
     }
+
+
     pub fn run(self) {
-        self.event.run(move | event, _, control_flow | {
-            match self.event {
-            //         Event::WindowEvent{event, ..} =>
-            //         match event {
-            //             WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
-            //             WindowEvent::KeyboardInput{input: KeyboardInput { virtual_keycode: Some(virtual_code), state, .. }, ..} => 
-            //             match state {
-            //                 ElementState::Pressed => {
-            //                     match virtual_code {
-            //                         VirtualKeyCode::Escape => {
-            //                             *control_flow = ControlFlow::Exit;
-            //                         },
-            //                         VirtualKeyCode::Left | VirtualKeyCode::Down | VirtualKeyCode::Right | VirtualKeyCode::Up => {
-            //                             let p = self.windowed_context.window().outer_position();
-            //                             let x = p.clone().unwrap().x;
-            //                             let y = p.clone().unwrap().y;
-            //                             let mut new = PhysicalPosition::new(0, 0);
-            //                             let offset = 10;
-            //                             if virtual_code == VirtualKeyCode::Left {
-            //                                 new = PhysicalPosition::new(x - offset, y);
-            //                             } else if virtual_code == VirtualKeyCode::Down {
-            //                                 new = PhysicalPosition::new(x, y + offset);
-            //                             } else if virtual_code == VirtualKeyCode::Right {
-            //                                 new = PhysicalPosition::new(x + offset, y);
-            //                             } else if virtual_code == VirtualKeyCode::Up {
-            //                                 new = PhysicalPosition::new(x, y - offset);
-            //                             }
-            //                             self.windowed_context.window().set_outer_position(new);
-            //                         },
-            //                         _ => ()
-            //                     }
-            //                 },
-            //                 ElementState::Released => {
-    
-            //                 }
-            //             }
-            //             _ =>()
-            //     }
-            //     Event::MainEventsCleared => {
-            //         self.last_time = std::time::Instant::now();
-            //         let millisec_at_fps = std::time::Duration::from_millis((1.0 / self.frame_rate * 1000.0) as u64);
-
-            //         self.app.update();
-    
-            //         self.windowed_context.window().request_redraw();
-    
-            //         let duration = std::time::Instant::now().duration_since(self.last_time);
-            //         if duration < millisec_at_fps {
-            //             std::thread::sleep(millisec_at_fps - duration);
-            //         }
-            //     },
-            //     Event::RedrawRequested(_) => {
-            //         self.app.draw();
-            //         // unsafe {
-
-            //         //     gl::ClearColor(n, n, n, 1.0);
-            //         //     gl::Clear(gl::COLOR_BUFFER_BIT);
-    
-            //         //     // gl::UseProgram(program);
-            //         //     // gl::BindVertexArray(vao);
-            //         //     // gl::DrawArrays(gl::TRIANGLES, 0, 3);
-            //         //     // gl::BindVertexArray(0);
-            //         //     // gl::UseProgram(0);
-            //         // }
-            //         self.windowed_context.swap_buffers().unwrap();
-            //     }
-            //     _ => *control_flow = ControlFlow::Poll
-            }
+        self.el.run(move | event, _, control_flow | {
+            match event {
+                    Event::WindowEvent{event, ..} =>
+                    match event {
+                        WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
+                        WindowEvent::KeyboardInput{input: KeyboardInput { virtual_keycode: Some(virtual_code), state, .. }, ..} =>
+                        match state {
+                            ElementState::Pressed => { /*self.app.key_pressed(virtual_code);*/ },
+                            ElementState::Released => { /*self.app.key_released(virtual_code);*/ },
+                            _ =>()
+                        }
+                        _ =>()
+                    },
+                    Event::MainEventsCleared => {
+                        //self.app.update();
+                        // self.windowed_context.window().request_redraw();
+                    },
+                    Event::RedrawRequested(_) => {
+                        // self.app.draw();
+                    },
+                    _ => *control_flow = ControlFlow::Poll
+                }
         });
     }
+            /*            WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
+                        WindowEvent::KeyboardInput{input: KeyboardInput { virtual_keycode: Some(virtual_code), state, .. }, ..} => 
+                        match state {
+                            ElementState::Pressed => {
+                                match virtual_code {
+                                    VirtualKeyCode::Escape => {
+                                        *control_flow = ControlFlow::Exit;
+                                    },
+                                    VirtualKeyCode::Left | VirtualKeyCode::Down | VirtualKeyCode::Right | VirtualKeyCode::Up => {
+                                        let p = self.windowed_context.window().outer_position();
+                                        let x = p.clone().unwrap().x;
+                                        let y = p.clone().unwrap().y;
+                                        let mut new = PhysicalPosition::new(0, 0);
+                                        let offset = 10;
+                                        if virtual_code == VirtualKeyCode::Left {
+                                            new = PhysicalPosition::new(x - offset, y);
+                                        } else if virtual_code == VirtualKeyCode::Down {
+                                            new = PhysicalPosition::new(x, y + offset);
+                                        } else if virtual_code == VirtualKeyCode::Right {
+                                            new = PhysicalPosition::new(x + offset, y);
+                                        } else if virtual_code == VirtualKeyCode::Up {
+                                            new = PhysicalPosition::new(x, y - offset);
+                                        }
+                                        self.windowed_context.window().set_outer_position(new);
+                                    },
+                                    _ => ()
+                                }
+                            },
+                            ElementState::Released => {
+    
+                            }
+                        }
+                        _ =>()
+                }
+                Event::MainEventsCleared => {
+                    self.last_time = std::time::Instant::now();
+                    let millisec_at_fps = std::time::Duration::from_millis((1.0 / self.frame_rate.clone() * 1000.0) as u64);
+
+                    self.windowed_context.window().request_redraw();
+    
+                    let duration = std::time::Instant::now().duration_since(self.last_time);
+                    if duration < millisec_at_fps {
+                        std::thread::sleep(millisec_at_fps - duration);
+                    }
+                },
+                Event::RedrawRequested(_) => {
+                    unsafe {
+                        // gl::ClearColor(n, n, n, 1.0);
+                        gl::Clear(gl::COLOR_BUFFER_BIT);
+    
+                        // gl::UseProgram(program);
+                        // gl::BindVertexArray(vao);
+                        // gl::DrawArrays(gl::TRIANGLES, 0, 3);
+                        // gl::BindVertexArray(0);
+                        // gl::UseProgram(0);
+                    }
+                    self.windowed_context.swap_buffers().unwrap();
+                }
+                _ => *control_flow = ControlFlow::Poll
+            }
+    */
+
 }
 
+static NUM : i32 = 111;
+
+fn coerce_static<'a>(_: &'a i32) -> &'a i32 {
+    &NUM
+}
+
+const CONFIG : i32 = 12;
+
+
 fn main() {
+    const TEST : i32 = 222;
     let mut window_setting = WindowSetting::new();
     window_setting.has_transparent = false;
 
-    Runner::new(&App::default()).run();
+    println!("{}", NUM);
+    {
+        let coerce_num: i32 = 9;
+        println!("{}", coerce_static(&coerce_num));
+    }
+
+    println!("{}", NUM);
+    let x: &'static str = "Hello, world.";
+
+    // x = "fff"
+
+    let r: Option<i32> = Some(123);
+    println!("{}", r.unwrap());
+
+    println!("{:?}", Runner::new(App::default()));
+
+
+    {
+    // let el = EventLoop::new();
+    // let wb = WindowBuilder::new()
+    //             .with_title("My Window")
+    //             .with_decorations(false)
+    //             .with_resizable(false)
+    //             .with_always_on_top(false)
+    //             .with_transparent(true)
+    //             .with_inner_size(PhysicalSize::new(512, 512))
+    //             .with_min_inner_size(PhysicalSize::new(256, 256));
+
+    // let windowed_context = ContextBuilder::new()
+    //             .with_gl(glutin::GlRequest::Latest)
+    //             .build_windowed(wb, &el).unwrap();
+    // let windowed_context = unsafe { windowed_context.make_current().unwrap() };
+
+    // el.run(move | event, _, control_flow | {
+    //     match event {
+    //         Event::WindowEvent{event, ..} =>
+    //         match event {
+    //             WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
+    //             WindowEvent::KeyboardInput{input: KeyboardInput { virtual_keycode: Some(virtual_code), state, .. }, ..} => 
+    //             match state {
+    //                 ElementState::Pressed => {
+    //                     match virtual_code {
+    //                         VirtualKeyCode::Escape => {
+    //                             *control_flow = ControlFlow::Exit;
+    //                         },
+    //                         VirtualKeyCode::Left | VirtualKeyCode::Down | VirtualKeyCode::Right | VirtualKeyCode::Up => {
+    //                             let p = windowed_context.window().outer_position();
+    //                             let x = p.clone().unwrap().x;
+    //                             let y = p.clone().unwrap().y;
+    //                             let mut new = PhysicalPosition::new(0, 0);
+    //                             let offset = 10;
+    //                             if virtual_code == VirtualKeyCode::Left {
+    //                                 new = PhysicalPosition::new(x - offset, y);
+    //                             } else if virtual_code == VirtualKeyCode::Down {
+    //                                 new = PhysicalPosition::new(x, y + offset);
+    //                             } else if virtual_code == VirtualKeyCode::Right {
+    //                                 new = PhysicalPosition::new(x + offset, y);
+    //                             } else if virtual_code == VirtualKeyCode::Up {
+    //                                 new = PhysicalPosition::new(x, y - offset);
+    //                             }
+    //                             windowed_context.window().set_outer_position(new);
+    //                         },
+    //                         _ => ()
+    //                     }
+    //                 },
+    //                 ElementState::Released => {
+
+    //                 }
+    //             }
+    //             _ =>()
+    //     }
+    //     Event::MainEventsCleared => {
+    //     },
+    //     Event::RedrawRequested(_) => {
+    //     }
+    //     _ => *control_flow = ControlFlow::Poll
+    //     }
+    // });
+}
 }
 
     // Runner{ app : &app::App::default() };
