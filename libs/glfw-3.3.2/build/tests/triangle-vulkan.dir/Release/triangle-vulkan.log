@@ -1,0 +1,5 @@
+﻿  Building Custom Rule C:/Users/YumaTaesu/Desktop/tasktest/libs/glfw-3.3.2/tests/CMakeLists.txt
+  triangle-vulkan.c
+  glad_vulkan.c
+  コードを生成中...
+  triangle-vulkan.vcxproj -> C:\Users\YumaTaesu\Desktop\tasktest\libs\glfw-3.3.2\build\tests\Release\triangle-vulkan.exe
