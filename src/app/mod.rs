@@ -1,7 +1,6 @@
 use crate::framework;
 use glfw::{Key, Modifiers};
 
-
 #[derive(Debug, Default)]
 pub struct App {
     number: i32
