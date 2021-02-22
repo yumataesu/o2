@@ -1,7 +1,0 @@
-﻿  Building Custom Rule C:/Users/YumaTaesu/Desktop/tasktest/libs/glfw-3.3.2/tests/CMakeLists.txt
-  glfwinfo.c
-  getopt.c
-  glad_gl.c
-  glad_vulkan.c
-  コードを生成中...
-  glfwinfo.vcxproj -> C:\Users\YumaTaesu\Desktop\tasktest\libs\glfw-3.3.2\build\tests\Release\glfwinfo.exe

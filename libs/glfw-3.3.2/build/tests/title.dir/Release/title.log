@@ -1,6 +1,0 @@
-﻿  Building Custom Rule C:/Users/YumaTaesu/Desktop/tasktest/libs/glfw-3.3.2/tests/CMakeLists.txt
-  title.c
-C:\Users\YumaTaesu\Desktop\tasktest\libs\glfw-3.3.2\tests\title.c(1,1): warning C4819: ファイルは、現在のコード ページ (932) で表示できない文字を含んでいます。データの損失を防ぐために、ファイルを Unicode 形式で保存してください。
-  glad_gl.c
-  コードを生成中...
-  title.vcxproj -> C:\Users\YumaTaesu\Desktop\tasktest\libs\glfw-3.3.2\build\tests\Release\title.exe
