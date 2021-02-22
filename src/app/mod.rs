@@ -1,5 +1,5 @@
 use crate::framework;
-use glfw::{Key, Modifiers};
+use glfw::{*};
 
 #[derive(Debug, Default)]
 pub struct App {
@@ -37,7 +37,7 @@ impl framework::BaseApp for App {
 
     fn draw(&self) {
         unsafe {
-            gl::ClearColor(0.0, 1.0, 0.0, 1.0);
+            gl::ClearColor(0.0, 0.2, 0.4, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
         }
     }
@@ -47,8 +47,23 @@ impl framework::BaseApp for App {
         println!("key_pressed {:?}", key);
     }
 
-
     fn key_released(&self, key: Key, modifiers: Modifiers) {
         println!("key_released {:?}", key);
+    }
+
+    fn mouse_pressed(&self, button: MouseButton) {
+        println!("mouse_pressed {:?}", button);
+    }
+
+    fn mouse_released(&self, button: MouseButton) {
+        println!("mouse_released {:?}", button);
+    }
+
+    fn file_dropped(&self, paths: Vec<std::path::PathBuf>) {
+        println!("file_dropped {:?}", paths);
+    }
+
+    fn cursor_moved(&self, x: f64, y: f64) {
+        // println!("cursor_moved {}, {}", x, y);
     }
 }

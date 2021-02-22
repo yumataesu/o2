@@ -1,8 +1,11 @@
 extern crate gl;
 extern crate glfw;
-use glfw::{Action, Context, Key, Modifiers};
+use glfw::{Action, Context, Key, MouseButton, Modifiers};
 
+pub mod util;
+pub mod settings;
 use crate::app::App;
+
 
 pub trait BaseApp {
     fn setup(&self);
@@ -10,6 +13,10 @@ pub trait BaseApp {
     fn draw(&self);
     fn key_pressed(&self, key: Key, modifiers: Modifiers);
     fn key_released(&self, key: Key, modifiers: Modifiers);
+    fn mouse_pressed(&self, button: MouseButton);
+    fn mouse_released(&self, button: MouseButton);
+    fn cursor_moved(&self, x: f64, y: f64);
+    fn file_dropped(&self, paths: Vec<std::path::PathBuf>);
 }
 
 
@@ -18,20 +25,25 @@ pub struct Runner {
     window: glfw::Window,
     events: std::sync::mpsc::Receiver<(f64, glfw::WindowEvent)>,
     glfw: glfw::Glfw,
+    window_settings: settings::WindowSettings,
     frame_rate : f64,
     last_time: std::time::Instant
 }
 
 
 impl Runner {
-    pub fn new(app: App) -> Self {
+    pub fn new(app: App, ws: settings::WindowSettings) -> Self {
         let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
-        glfw.window_hint(glfw::WindowHint::ContextVersion(4, 1));
+        glfw.window_hint(glfw::WindowHint::ContextVersion(ws.gl_version.0.clone(), ws.gl_version.1.clone()));
 
-        let (mut window, events) = glfw.create_window(1280, 720, "Hello this is window", glfw::WindowMode::Windowed)
+        let (mut window, events) = glfw.create_window(ws.window_size.0.clone(), ws.window_size.1.clone(), &ws.title, glfw::WindowMode::Windowed)
             .expect("Failed to create GLFW window.");
 
         window.set_key_polling(true);
+        window.set_mouse_button_polling(true);
+        window.set_scroll_polling(true);
+        window.set_cursor_pos_polling(true);
+        window.set_drag_and_drop_polling(true);
         window.make_current();
 
         unsafe {
@@ -40,7 +52,15 @@ impl Runner {
         }
 
         app.setup();
-        Runner { app: app, window: window, events: events, glfw: glfw, frame_rate: 60.0 as f64,  last_time: std::time::Instant::now() }
+        Runner { 
+            app: app, 
+            window: window, 
+            events: events, 
+            glfw: glfw,
+            window_settings: ws,
+            frame_rate: 60.0 as f64, 
+            last_time: std::time::Instant::now() 
+        }
     }
 
 
@@ -79,6 +99,23 @@ impl Runner {
                             Action::Repeat => {}
                             _ => {}
                         }
+                    },
+                    glfw::WindowEvent::MouseButton(button, action, modifiers) => {
+                        match action {
+                            Action::Press => {
+                                self.app.mouse_pressed(button);
+                            },
+                            Action::Release => {
+                                self.app.mouse_released(button);
+                            },
+                            Action::Repeat => {}
+                        }
+                    },
+                    glfw::WindowEvent::CursorPos(x, y) => {
+                        self.app.cursor_moved(x, y);
+                    },
+                    glfw::WindowEvent::FileDrop(paths) => {
+                        self.app.file_dropped(paths);
                     }
                     _ => {}
                 }
