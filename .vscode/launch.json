@@ -7,15 +7,15 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'tasktest'",
+            "name": "Debug executable 'Lazarus'",
             "cargo": {
                 "args": [
                     "build",
-                    "--bin=tasktest",
-                    "--package=tasktest"
+                    "--bin=Lazarus",
+                    "--package=Lazarus"
                 ],
                 "filter": {
-                    "name": "tasktest",
+                    "name": "Lazarus",
                     "kind": "bin"
                 }
             },
@@ -25,16 +25,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in executable 'tasktest'",
+            "name": "Debug unit tests in executable 'Lazarus'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
-                    "--bin=tasktest",
-                    "--package=tasktest"
+                    "--bin=Lazarus",
+                    "--package=Lazarus"
                 ],
                 "filter": {
-                    "name": "tasktest",
+                    "name": "Lazarus",
                     "kind": "bin"
                 }
             },
