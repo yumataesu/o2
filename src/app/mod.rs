@@ -1,5 +1,5 @@
 use crate::framework;
-use glfw::{*};
+use imgui_glfw_rs::glfw::{Key, Modifiers, MouseButton};
 
 #[derive(Debug, Default)]
 pub struct App {
