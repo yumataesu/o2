@@ -1,10 +1,12 @@
 use crate::framework;
 use imgui_glfw_rs::glfw::{Key, Modifiers, MouseButton};
 
+
 #[derive(Debug, Default)]
 pub struct App {
     number: i32
 }
+
 
 impl framework::BaseApp for App {
 
@@ -40,6 +42,11 @@ impl framework::BaseApp for App {
             gl::ClearColor(0.0, 0.2, 0.4, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
         }
+    }
+
+
+    fn draw_gui(&self, ui: &imgui_glfw_rs::imgui::Ui) {
+        ui.show_demo_window(&mut true);
     }
 
 

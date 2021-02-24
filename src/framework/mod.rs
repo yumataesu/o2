@@ -1,26 +1,20 @@
 use gl;
-// use glfw::*;
-  
-// use glfw::Context;
-// use imgui::Context as ImContext;
+
 use imgui_glfw_rs::glfw::{self, Context};
 use imgui_glfw_rs::imgui;
 use imgui_glfw_rs::ImguiGLFW;
 
-use imgui_opengl_renderer::Renderer;
-
-use std::{ffi::CStr, slice::Windows};
-use std::os::raw::c_void;
-
 pub mod util;
 pub mod settings;
-use crate::app::App;
+use super::framework::gl as rgl;
 
+use crate::app::App;
 
 pub trait BaseApp {
     fn setup(&self);
     fn update(&self);
     fn draw(&self);
+    fn draw_gui(&self, ui: &imgui_glfw_rs::imgui::Ui);
     fn key_pressed(&self, key: glfw::Key, modifiers: glfw::Modifiers);
     fn key_released(&self, key: glfw::Key, modifiers: glfw::Modifiers);
     fn mouse_pressed(&self, button: glfw::MouseButton);
@@ -48,7 +42,6 @@ impl Runner {
         let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
         glfw.window_hint(glfw::WindowHint::ContextVersion(ws.gl_version.0.clone(), ws.gl_version.1.clone()));
 
-
         let (mut window, events) = glfw
         .create_window(
             ws.window_size.0.clone(),
@@ -67,7 +60,7 @@ impl Runner {
         }
 
         let mut imgui = imgui::Context::create();
-        let mut imgui_glfw = ImguiGLFW::new(&mut imgui, &mut window);
+        let imgui_glfw = ImguiGLFW::new(&mut imgui, &mut window);
 
         app.setup();
         Runner { 
@@ -86,20 +79,21 @@ impl Runner {
 
     pub fn run(&mut self) {
         while !self.window.should_close() {
-            self.glfw.poll_events();
             self.last_time = std::time::Instant::now();
             let millisec_at_fps = std::time::Duration::from_millis((1.0 / self.frame_rate.clone() * 1000.0) as u64);
 
             self.app.update();
             self.app.draw();
-            let ui = self.imgui_glfw.frame(&mut self.window, &mut self.imgui);
 
-            ui.show_demo_window(&mut true);
-    
+
+            let ui = self.imgui_glfw.frame(&mut self.window, &mut self.imgui);
+            self.app.draw_gui(&ui);
             self.imgui_glfw.draw(ui, &mut self.window);
+
 
             self.window.swap_buffers();
 
+            //event
             self.glfw.poll_events();
             for (_, event) in glfw::flush_messages(&self.events) {
                 self.imgui_glfw.handle_event(&mut self.imgui, &event);
