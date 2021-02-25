@@ -14,7 +14,7 @@ pub trait BaseApp {
     fn setup(&self);
     fn update(&self);
     fn draw(&self);
-    fn draw_gui(&self, ui: &imgui_glfw_rs::imgui::Ui);
+    fn draw_gui(&mut self, ui: &imgui_glfw_rs::imgui::Ui);
     fn key_pressed(&self, key: glfw::Key, modifiers: glfw::Modifiers);
     fn key_released(&self, key: glfw::Key, modifiers: glfw::Modifiers);
     fn mouse_pressed(&self, button: glfw::MouseButton);

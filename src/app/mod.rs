@@ -1,10 +1,11 @@
 use crate::framework;
 use imgui_glfw_rs::glfw::{Key, Modifiers, MouseButton};
-
+use imgui_glfw_rs::imgui;
 
 #[derive(Debug, Default)]
 pub struct App {
-    number: i32
+    number: i32,
+    val: f32
 }
 
 
@@ -45,8 +46,14 @@ impl framework::BaseApp for App {
     }
 
 
-    fn draw_gui(&self, ui: &imgui_glfw_rs::imgui::Ui) {
+    fn draw_gui(&mut self, ui: &imgui::Ui) {
         ui.show_demo_window(&mut true);
+        // ui.window(imgui::im_str!("win")).build(
+        //     move || {
+        //         ui.slider_float(imgui::im_str!("u8 value"), &mut self.val, -1.0, 1.0).build();
+        //     }
+        // );
+        ui.slider_float(imgui::im_str!("u8 value"), &mut self.val, -1.0, 1.0).build();
     }
 
 
