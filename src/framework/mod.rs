@@ -6,14 +6,14 @@ use imgui_glfw_rs::ImguiGLFW;
 
 pub mod util;
 pub mod settings;
-use super::framework::gl as rgl;
+pub mod rgl;
 
 use crate::app::App;
 
 pub trait BaseApp {
-    fn setup(&self);
-    fn update(&self);
-    fn draw(&self);
+    fn setup(&mut self);
+    fn update(&mut self);
+    fn draw(&mut self);
     fn draw_gui(&mut self, ui: &imgui_glfw_rs::imgui::Ui);
     fn key_pressed(&self, key: glfw::Key, modifiers: glfw::Modifiers);
     fn key_released(&self, key: glfw::Key, modifiers: glfw::Modifiers);
@@ -38,7 +38,7 @@ pub struct Runner {
 
 
 impl Runner {
-    pub fn new(app: App, ws: settings::WindowSettings) -> Self {
+    pub fn new(mut app: App, ws: settings::WindowSettings) -> Self {
         let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
         glfw.window_hint(glfw::WindowHint::ContextVersion(ws.gl_version.0.clone(), ws.gl_version.1.clone()));
 
@@ -62,7 +62,6 @@ impl Runner {
         let mut imgui = imgui::Context::create();
         let imgui_glfw = ImguiGLFW::new(&mut imgui, &mut window);
 
-        app.setup();
         Runner { 
             app: app, 
             window: window, 
@@ -78,6 +77,8 @@ impl Runner {
 
 
     pub fn run(&mut self) {
+        self.app.setup();
+
         while !self.window.should_close() {
             self.last_time = std::time::Instant::now();
             let millisec_at_fps = std::time::Duration::from_millis((1.0 / self.frame_rate.clone() * 1000.0) as u64);
