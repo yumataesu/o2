@@ -15,12 +15,12 @@ pub trait BaseApp {
     fn update(&mut self);
     fn draw(&mut self);
     fn draw_gui(&mut self, ui: &imgui_glfw_rs::imgui::Ui);
-    fn key_pressed(&self, key: glfw::Key, modifiers: glfw::Modifiers);
-    fn key_released(&self, key: glfw::Key, modifiers: glfw::Modifiers);
-    fn mouse_pressed(&self, button: glfw::MouseButton);
-    fn mouse_released(&self, button: glfw::MouseButton);
-    fn cursor_moved(&self, x: f64, y: f64);
-    fn file_dropped(&self, paths: Vec<std::path::PathBuf>);
+    fn key_pressed(&mut self, key: glfw::Key, modifiers: glfw::Modifiers);
+    fn key_released(&mut self, key: glfw::Key, modifiers: glfw::Modifiers);
+    fn mouse_pressed(&mut self, button: glfw::MouseButton);
+    fn mouse_released(&mut self, button: glfw::MouseButton);
+    fn cursor_moved(&mut self, x: f64, y: f64);
+    fn file_dropped(&mut self, paths: Vec<std::path::PathBuf>);
 }
 
 
@@ -62,6 +62,7 @@ impl Runner {
         let mut imgui = imgui::Context::create();
         let imgui_glfw = ImguiGLFW::new(&mut imgui, &mut window);
 
+        
         Runner { 
             app: app, 
             window: window, 
