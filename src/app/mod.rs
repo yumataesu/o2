@@ -1,4 +1,4 @@
-use crate::framework;
+use crate::framework::{self, opengl};
 use imgui_glfw_rs::glfw::{Key, Modifiers, MouseButton};
 use imgui_glfw_rs::imgui;
 use std::mem;
@@ -7,29 +7,30 @@ use std::mem;
 pub struct App {
     number: i32,
     val: f32,
-    shader: framework::rgl::shader::Shader,
-    vao: gl::types::GLuint
+    shader: framework::opengl::shader::Shader,
+    vao: gl::types::GLuint,
+    vbo: framework::opengl::vbo::Vbo
 }
 
-#[rustfmt::skip]
-static VERTEX_DATA: [f32; 15] = [
-    -0.5, -0.5,  1.0,  0.0,  0.0,
-     0.0,  0.5,  0.0,  1.0,  0.0,
-     0.5, -0.5,  0.0,  0.0,  1.0,
-];
-#[derive(Debug, Default)]
-pub struct Test {
-    num: f32
-}
+// #[derive(Debug, Default)]
+// pub struct Test {
+//     num: f32
+// }
 
-fn do_fn_once<F: FnOnce()>(f: F) {
-    f();
-}
+// fn do_fn_once<F: FnOnce()>(f: F) {
+//     f();
+// }
 
-fn do_fn<F: Fn()>(f: F) {
-    f();
-    f();
-}
+// fn do_fn<F: Fn()>(f: F) {
+//     f();
+//     f();
+// }
+
+// impl App {
+//     fn test(&self) {
+//         println!("test {}", self.number);
+//     }
+// }
 
 // fn do_mut<F: FnMut()>(f: F) {
 //     f();
@@ -58,50 +59,60 @@ impl framework::BaseApp for App {
         add(&arg);
         println!("arg: {:p}", &arg);
         println!("num: {:p}", &num);
-        do_fn_once(f);
+        // do_fn_once(f);
+        // self.test();
+
         f();
 
-        // self.shader = framework::rgl::shader::Shader::new();
-        // self.shader.load("data/shader/shader.vert", "data/shader/shader.frag");
+        self.shader = framework::opengl::shader::Shader::new();
+        self.shader.load("data/shader/shader.vert", "data/shader/shader.frag");
 
-        // unsafe {
-        //     let mut vb = std::mem::zeroed();
-        //     gl::GenBuffers(1, &mut vb);
-        //     gl::BindBuffer(gl::ARRAY_BUFFER, vb);
-        //     gl::BufferData(
-        //         gl::ARRAY_BUFFER,
-        //         (VERTEX_DATA.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr,
-        //         VERTEX_DATA.as_ptr() as *const _,
-        //         gl::STATIC_DRAW,
-        //     );
+        let verts: Vec<f32> = vec![
+            -0.5, -0.5,  1.0,  0.0,  0.0,
+             0.0,  0.5,  0.0,  1.0,  0.0,
+             0.5, -0.5,  0.0,  0.0,  1.0
+        ];
+        // self.vbo = framework::opengl::vbo::Vbo::new();
+        // self.vbo.allocate(verts);
+
+        unsafe {
+            let mut vb = std::mem::zeroed();
+            gl::GenBuffers(1, &mut vb);
+            gl::BindBuffer(gl::ARRAY_BUFFER, vb);
+            gl::BufferData(
+                gl::ARRAY_BUFFER,
+                (verts.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr,
+                verts.as_ptr() as *const _,
+                gl::STATIC_DRAW,
+            );
     
-        //     //if gl::BindVertexArray.is_loaded() {
-        //     self.vao = std::mem::zeroed();
-        //     gl::GenVertexArrays(1, &mut self.vao);
-        //     gl::BindVertexArray(self.vao);
-        //     //}//
+            //if gl::BindVertexArray.is_loaded() {
+            self.vao = std::mem::zeroed();
+            gl::GenVertexArrays(1, &mut self.vao);
+            gl::BindVertexArray(self.vao);
+            //}//
     
-        //     let pos_attrib = gl::GetAttribLocation(self.shader.get_program(), b"position\0".as_ptr() as *const _);
-        //     let color_attrib = gl::GetAttribLocation(self.shader.get_program(), b"color\0".as_ptr() as *const _);
-        //     gl::VertexAttribPointer(
-        //         pos_attrib as gl::types::GLuint,
-        //         2,
-        //         gl::FLOAT,
-        //         0,
-        //         5 * std::mem::size_of::<f32>() as gl::types::GLsizei,
-        //         std::ptr::null(),
-        //     );
-        //     gl::VertexAttribPointer(
-        //         color_attrib as gl::types::GLuint,
-        //         3,
-        //         gl::FLOAT,
-        //         0,
-        //         5 * std::mem::size_of::<f32>() as gl::types::GLsizei,
-        //         (2 * std::mem::size_of::<f32>()) as *const () as *const _,
-        //     );
-        //     gl::EnableVertexAttribArray(pos_attrib as gl::types::GLuint);
-        //     gl::EnableVertexAttribArray(color_attrib as gl::types::GLuint);
-        // }
+            let pos_attrib = gl::GetAttribLocation(self.shader.get_program(), b"position\0".as_ptr() as *const _);
+            let color_attrib = gl::GetAttribLocation(self.shader.get_program(), b"color\0".as_ptr() as *const _);
+            gl::VertexAttribPointer(
+                pos_attrib as gl::types::GLuint,
+                2,
+                gl::FLOAT,
+                0,
+                5 * std::mem::size_of::<f32>() as gl::types::GLsizei,
+                std::ptr::null(),
+            );
+            gl::VertexAttribPointer(
+                color_attrib as gl::types::GLuint,
+                3,
+                gl::FLOAT,
+                0,
+                5 * std::mem::size_of::<f32>() as gl::types::GLsizei,
+                (2 * std::mem::size_of::<f32>()) as *const () as *const _,
+            );
+            gl::EnableVertexAttribArray(pos_attrib as gl::types::GLuint);
+            gl::EnableVertexAttribArray(color_attrib as gl::types::GLuint);
+        }
 
 
     }
@@ -113,14 +124,13 @@ impl framework::BaseApp for App {
 
 
     fn draw(&mut self) {
+        framework::opengl::utils::clear_color(0.05, 0.05, 0.05, 1.0);
+        framework::opengl::utils::clear();
         unsafe {
-            gl::ClearColor(0.0, 0.2, 0.4, 1.0);
-            gl::Clear(gl::COLOR_BUFFER_BIT);
-
-            // self.shader.begin();
-            // gl::BindVertexArray(self.vao);
-            // gl::DrawArrays(gl::TRIANGLES, 0, 3);
-            // self.shader.end();
+            self.shader.begin();
+            gl::BindVertexArray(self.vao);
+            gl::DrawArrays(gl::TRIANGLES, 0, 3);
+            self.shader.end();
 
         }
     }
@@ -128,14 +138,8 @@ impl framework::BaseApp for App {
 
     fn draw_gui(&mut self, ui: &imgui::Ui) {
         ui.show_demo_window(&mut true);
-        // ui.window(imgui::im_str!("win")).build(
-        //     move || {
-        //         ui.slider_float(imgui::im_str!("u8 value"), &mut self.val, -1.0, 1.0).build();
-        //     }
-        // );
         let win = ui.window(imgui::im_str!("title"));
         ui.slider_float(imgui::im_str!("u8 value"), &mut self.val, -1.0, 1.0).build();
-        
     }
 
 

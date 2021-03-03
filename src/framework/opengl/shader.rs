@@ -1,3 +1,5 @@
+use crate::framework;
+
 #[derive(Debug, Default)]
 pub struct Shader {
     program: gl::types::GLuint
@@ -46,3 +48,5 @@ impl Shader {
         }
     }
 }
+
+

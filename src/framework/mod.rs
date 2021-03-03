@@ -6,7 +6,7 @@ use imgui_glfw_rs::ImguiGLFW;
 
 pub mod util;
 pub mod settings;
-pub mod rgl;
+pub mod opengl;
 
 use crate::app::App;
 
