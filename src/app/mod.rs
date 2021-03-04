@@ -1,7 +1,6 @@
 use crate::framework::{self, opengl};
 use imgui_glfw_rs::glfw::{Key, Modifiers, MouseButton};
 use imgui_glfw_rs::imgui;
-use std::mem;
 
 #[derive(Debug, Default)]
 pub struct App {
@@ -22,63 +21,27 @@ impl framework::BaseApp for App {
         self.shader = framework::opengl::shader::Shader::new();
         self.shader.load("data/shader/shader.vert", "data/shader/shader.frag");
 
-        let verts: Vec<f32> = vec![
-            -0.5, -0.5, 0.0,  1.0,  0.0,  0.0,
-             0.0,  0.5, 0.0,  0.0,  1.0,  0.0,
-             0.5, -0.5, 0.0,  0.0,  0.0,  1.0
-        ];
-
-
         let vetices: Vec<f32> = vec![
-            -0.5, -0.5, 0.0,
-             0.0,  0.5, 0.0,
-             0.5, -0.5, 0.0
+            -0.5, -0.5,  0.0,
+             0.0,  0.5,  0.0,
+             0.5, -0.5,  0.0
         ];
 
         let colors: Vec<f32> = vec![
-            0.5, 0.5, 0.0,
-             0.0,  0.5, 0.0,
-             0.5, 0.0, 0.0
+             1.0, 0.0, 0.0,
+             0.0, 1.0, 0.0,
+             0.0, 0.0, 1.0
         ];
 
         self.position_vbo = framework::opengl::vbo::Vbo::new();
-        self.position_vbo.allocate(&vetices);
+        self.position_vbo.allocate(vetices);
 
-        // self.color_vbo = framework::opengl::vbo::Vbo::new();
-        // self.color_vbo.allocate(&colors);
+        self.color_vbo = framework::opengl::vbo::Vbo::new();
+        self.color_vbo.allocate(colors);
 
         self.vao = framework::opengl::vao::Vao::new();
         self.vao.set_position_vbo(&self.position_vbo);
-        // self.vao.set_color_vbo(&self.color_vbo);
-
-        // unsafe {
-        //     //if gl::BindVertexArray.is_loaded() {
-        //     self.id = std::mem::zeroed();
-        //     gl::GenVertexArrays(1, &mut self.id);
-        //     gl::BindVertexArray(self.id);
-        //     //}//
-    
-        //     let pos_attrib = gl::GetAttribLocation(self.shader.get_program(), b"position\0".as_ptr() as *const _);
-        //     let color_attrib = gl::GetAttribLocation(self.shader.get_program(), b"color\0".as_ptr() as *const _);
-        //     gl::VertexAttribPointer(
-        //         pos_attrib as gl::types::GLuint,
-        //         3,
-        //         gl::FLOAT,
-        //         0,
-        //         6 * std::mem::size_of::<f32>() as gl::types::GLsizei,
-        //         std::ptr::null(),
-        //     );
-        //     gl::VertexAttribPointer(
-        //         color_attrib as gl::types::GLuint,
-        //         3,
-        //         gl::FLOAT,
-        //         0,
-        //         6 * std::mem::size_of::<f32>() as gl::types::GLsizei,
-        //         (3 * std::mem::size_of::<f32>()) as *const () as *const _,
-        //     );
-        //     gl::EnableVertexAttribArray(pos_attrib as gl::types::GLuint);
-        //     gl::EnableVertexAttribArray(color_attrib as gl::types::GLuint);
-        // }
+        self.vao.set_color_vbo(&self.color_vbo);
     }
 
 
@@ -91,11 +54,7 @@ impl framework::BaseApp for App {
         framework::opengl::utils::clear_color(0.05, 0.05, 0.05, 1.0);
         framework::opengl::utils::clear();
         self.shader.begin();
-        //self.vao.draw();
-        // unsafe {
-        //     gl::BindVertexArray(self.id);
-        //     gl::DrawArrays(gl::TRIANGLES, 0, 3);
-        // }
+        self.vao.draw();
         self.shader.end();
     }
 

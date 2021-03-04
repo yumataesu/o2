@@ -13,21 +13,18 @@ impl Vbo {
         }
     }
 
-    pub fn allocate(&mut self, v: &Vec<f32>) {
+    pub fn allocate(&mut self, v: Vec<f32>) {
+        self.vertices = v;
         unsafe {
-            // self.vertices = v;
-            println!("allocate {}", self.id);
             gl::BindBuffer(gl::ARRAY_BUFFER, self.id);
             gl::BufferData(
                 gl::ARRAY_BUFFER,
-                (v.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr,
-                v.as_ptr() as *const _,
+                (self.vertices.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr,
+                self.vertices.as_ptr() as *const _,
                 gl::STATIC_DRAW,
             );
         }
     }
-
-
 
     pub fn bind(&self) {
         unsafe {
@@ -41,7 +38,7 @@ impl Vbo {
         }
     }
 
-    pub fn get_vbo(&self) -> &gl::types::GLuint {
+    pub fn get(&self) -> &gl::types::GLuint {
         unsafe {
             &self.id
         }
@@ -49,5 +46,9 @@ impl Vbo {
 
     pub fn get_vertices(&self) -> &Vec<f32> {
         &self.vertices
+    }
+
+    pub fn get_num_verts(&self) -> u32 {
+        self.vertices.len() as u32
     }
 }
