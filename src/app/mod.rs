@@ -8,113 +8,77 @@ pub struct App {
     number: i32,
     val: f32,
     shader: framework::opengl::shader::Shader,
-    vao: gl::types::GLuint,
-    vbo: framework::opengl::vbo::Vbo
+    id: gl::types::GLuint,
+    vao: framework::opengl::vao::Vao,
+    position_vbo: framework::opengl::vbo::Vbo,
+    color_vbo: framework::opengl::vbo::Vbo
 }
-
-// #[derive(Debug, Default)]
-// pub struct Test {
-//     num: f32
-// }
-
-// fn do_fn_once<F: FnOnce()>(f: F) {
-//     f();
-// }
-
-// fn do_fn<F: Fn()>(f: F) {
-//     f();
-//     f();
-// }
-
-// impl App {
-//     fn test(&self) {
-//         println!("test {}", self.number);
-//     }
-// }
-
-// fn do_mut<F: FnMut()>(f: F) {
-//     f();
-// }
 
 impl framework::BaseApp for App {
 
     fn setup(&mut self) {
         println!("setup");
 
-        let arg = String::from("Args");
-        let num = String::from("Num");
-
-        println!("num: {:p}", &num);
-        println!("arg: {:p}", &arg);
-
-        let add = |arg| {
-            println!("arg in clojure: {:p}", &arg);
-            println!("num in clojure: {:p}", &num);
-        };
-
-        let f = || {
-            println!("num in fnonce clojure: {:p}", &num);
-        };
-
-        add(&arg);
-        println!("arg: {:p}", &arg);
-        println!("num: {:p}", &num);
-        // do_fn_once(f);
-        // self.test();
-
-        f();
-
         self.shader = framework::opengl::shader::Shader::new();
         self.shader.load("data/shader/shader.vert", "data/shader/shader.frag");
 
         let verts: Vec<f32> = vec![
-            -0.5, -0.5,  1.0,  0.0,  0.0,
-             0.0,  0.5,  0.0,  1.0,  0.0,
-             0.5, -0.5,  0.0,  0.0,  1.0
+            -0.5, -0.5, 0.0,  1.0,  0.0,  0.0,
+             0.0,  0.5, 0.0,  0.0,  1.0,  0.0,
+             0.5, -0.5, 0.0,  0.0,  0.0,  1.0
         ];
-        // self.vbo = framework::opengl::vbo::Vbo::new();
-        // self.vbo.allocate(verts);
 
-        unsafe {
-            let mut vb = std::mem::zeroed();
-            gl::GenBuffers(1, &mut vb);
-            gl::BindBuffer(gl::ARRAY_BUFFER, vb);
-            gl::BufferData(
-                gl::ARRAY_BUFFER,
-                (verts.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr,
-                verts.as_ptr() as *const _,
-                gl::STATIC_DRAW,
-            );
+
+        let vetices: Vec<f32> = vec![
+            -0.5, -0.5, 0.0,
+             0.0,  0.5, 0.0,
+             0.5, -0.5, 0.0
+        ];
+
+        let colors: Vec<f32> = vec![
+            0.5, 0.5, 0.0,
+             0.0,  0.5, 0.0,
+             0.5, 0.0, 0.0
+        ];
+
+        self.position_vbo = framework::opengl::vbo::Vbo::new();
+        self.position_vbo.allocate(&vetices);
+
+        // self.color_vbo = framework::opengl::vbo::Vbo::new();
+        // self.color_vbo.allocate(&colors);
+
+        self.vao = framework::opengl::vao::Vao::new();
+        self.vao.set_position_vbo(&self.position_vbo);
+        // self.vao.set_color_vbo(&self.color_vbo);
+
+        // unsafe {
+        //     //if gl::BindVertexArray.is_loaded() {
+        //     self.id = std::mem::zeroed();
+        //     gl::GenVertexArrays(1, &mut self.id);
+        //     gl::BindVertexArray(self.id);
+        //     //}//
     
-            //if gl::BindVertexArray.is_loaded() {
-            self.vao = std::mem::zeroed();
-            gl::GenVertexArrays(1, &mut self.vao);
-            gl::BindVertexArray(self.vao);
-            //}//
-    
-            let pos_attrib = gl::GetAttribLocation(self.shader.get_program(), b"position\0".as_ptr() as *const _);
-            let color_attrib = gl::GetAttribLocation(self.shader.get_program(), b"color\0".as_ptr() as *const _);
-            gl::VertexAttribPointer(
-                pos_attrib as gl::types::GLuint,
-                2,
-                gl::FLOAT,
-                0,
-                5 * std::mem::size_of::<f32>() as gl::types::GLsizei,
-                std::ptr::null(),
-            );
-            gl::VertexAttribPointer(
-                color_attrib as gl::types::GLuint,
-                3,
-                gl::FLOAT,
-                0,
-                5 * std::mem::size_of::<f32>() as gl::types::GLsizei,
-                (2 * std::mem::size_of::<f32>()) as *const () as *const _,
-            );
-            gl::EnableVertexAttribArray(pos_attrib as gl::types::GLuint);
-            gl::EnableVertexAttribArray(color_attrib as gl::types::GLuint);
-        }
-
-
+        //     let pos_attrib = gl::GetAttribLocation(self.shader.get_program(), b"position\0".as_ptr() as *const _);
+        //     let color_attrib = gl::GetAttribLocation(self.shader.get_program(), b"color\0".as_ptr() as *const _);
+        //     gl::VertexAttribPointer(
+        //         pos_attrib as gl::types::GLuint,
+        //         3,
+        //         gl::FLOAT,
+        //         0,
+        //         6 * std::mem::size_of::<f32>() as gl::types::GLsizei,
+        //         std::ptr::null(),
+        //     );
+        //     gl::VertexAttribPointer(
+        //         color_attrib as gl::types::GLuint,
+        //         3,
+        //         gl::FLOAT,
+        //         0,
+        //         6 * std::mem::size_of::<f32>() as gl::types::GLsizei,
+        //         (3 * std::mem::size_of::<f32>()) as *const () as *const _,
+        //     );
+        //     gl::EnableVertexAttribArray(pos_attrib as gl::types::GLuint);
+        //     gl::EnableVertexAttribArray(color_attrib as gl::types::GLuint);
+        // }
     }
 
 
@@ -126,13 +90,13 @@ impl framework::BaseApp for App {
     fn draw(&mut self) {
         framework::opengl::utils::clear_color(0.05, 0.05, 0.05, 1.0);
         framework::opengl::utils::clear();
-        unsafe {
-            self.shader.begin();
-            gl::BindVertexArray(self.vao);
-            gl::DrawArrays(gl::TRIANGLES, 0, 3);
-            self.shader.end();
-
-        }
+        self.shader.begin();
+        //self.vao.draw();
+        // unsafe {
+        //     gl::BindVertexArray(self.id);
+        //     gl::DrawArrays(gl::TRIANGLES, 0, 3);
+        // }
+        self.shader.end();
     }
 
 

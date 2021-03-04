@@ -10,3 +10,8 @@ pub fn clear() {
     }
 }
 
+enum DrawType {
+    Point,
+    Fill,
+    Wireframe
+}
