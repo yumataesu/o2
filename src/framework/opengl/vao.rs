@@ -1,10 +1,5 @@
 use super::vbo;
 
-enum Attribute {
-    Position,
-    Color
-}
-
 #[derive(Debug, Default)]
 pub struct Vao {
     id: gl::types::GLuint

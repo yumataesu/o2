@@ -1,12 +1,16 @@
+mod opengl;
+pub mod settings;
+
 use gl;
 
-use imgui_glfw_rs::glfw::{self, Context};
+pub use imgui_glfw_rs::glfw::{self, Context};
 use imgui_glfw_rs::imgui;
 use imgui_glfw_rs::ImguiGLFW;
 
-pub mod util;
-pub mod settings;
-pub mod opengl;
+pub use opengl::Shader as Shader;
+pub use opengl::Vbo as Vbo;
+pub use opengl::Vao as Vao;
+pub use opengl::Utils as gl_utils;
 
 use crate::app::App;
 
@@ -86,7 +90,6 @@ impl Runner {
 
             self.app.update();
             self.app.draw();
-
 
             let ui = self.imgui_glfw.frame(&mut self.window, &mut self.imgui);
             self.app.draw_gui(&ui);

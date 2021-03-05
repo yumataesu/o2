@@ -1,4 +1,4 @@
-use crate::framework::{self, opengl};
+use crate::framework::{self};
 use imgui_glfw_rs::glfw::{Key, Modifiers, MouseButton};
 use imgui_glfw_rs::imgui;
 
@@ -6,11 +6,10 @@ use imgui_glfw_rs::imgui;
 pub struct App {
     number: i32,
     val: f32,
-    shader: framework::opengl::shader::Shader,
-    id: gl::types::GLuint,
-    vao: framework::opengl::vao::Vao,
-    position_vbo: framework::opengl::vbo::Vbo,
-    color_vbo: framework::opengl::vbo::Vbo
+    shader: framework::Shader,
+    vao: framework::Vao,
+    position_vbo: framework::Vbo,
+    color_vbo: framework::Vbo
 }
 
 impl framework::BaseApp for App {
@@ -18,7 +17,7 @@ impl framework::BaseApp for App {
     fn setup(&mut self) {
         println!("setup");
 
-        self.shader = framework::opengl::shader::Shader::new();
+        self.shader = framework::Shader::new();
         self.shader.load("data/shader/shader.vert", "data/shader/shader.frag");
 
         let vetices: Vec<f32> = vec![
@@ -33,13 +32,13 @@ impl framework::BaseApp for App {
              0.0, 0.0, 1.0
         ];
 
-        self.position_vbo = framework::opengl::vbo::Vbo::new();
+        self.position_vbo = framework::Vbo::new();
         self.position_vbo.allocate(vetices);
 
-        self.color_vbo = framework::opengl::vbo::Vbo::new();
+        self.color_vbo = framework::Vbo::new();
         self.color_vbo.allocate(colors);
 
-        self.vao = framework::opengl::vao::Vao::new();
+        self.vao = framework::Vao::new();
         self.vao.set_position_vbo(&self.position_vbo);
         self.vao.set_color_vbo(&self.color_vbo);
     }
@@ -51,8 +50,8 @@ impl framework::BaseApp for App {
 
 
     fn draw(&mut self) {
-        framework::opengl::utils::clear_color(0.05, 0.05, 0.05, 1.0);
-        framework::opengl::utils::clear();
+        framework::gl_utils::clear_color(0.1, 0.1, 0.1, 1.0);
+        framework::gl_utils::clear();
         self.shader.begin();
         self.vao.draw();
         self.shader.end();
