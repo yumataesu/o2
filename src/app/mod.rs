@@ -1,6 +1,7 @@
 use crate::framework::{self};
 use imgui_glfw_rs::glfw::{Key, Modifiers, MouseButton};
 use imgui_glfw_rs::imgui;
+use framework::Load;
 
 #[derive(Debug, Default)]
 pub struct App {
@@ -18,7 +19,7 @@ impl framework::BaseApp for App {
         println!("setup");
 
         self.shader = framework::Shader::new();
-        self.shader.load("data/shader/shader.vert", "data/shader/shader.frag");
+        self.shader.load("data/shader/shader");
 
         let vetices: Vec<f32> = vec![
             -0.5, -0.5,  0.0,

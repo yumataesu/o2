@@ -46,9 +46,7 @@ impl Vao {
     }
 
     pub fn get(&self) -> &gl::types::GLuint {
-        unsafe {
-            &self.id
-        }
+        &self.id
     }
 
     pub fn draw(&self) {

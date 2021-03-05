@@ -39,9 +39,7 @@ impl Vbo {
     }
 
     pub fn get(&self) -> &gl::types::GLuint {
-        unsafe {
-            &self.id
-        }
+        &self.id
     }
 
     pub fn get_vertices(&self) -> &Vec<f32> {

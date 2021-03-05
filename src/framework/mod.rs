@@ -1,5 +1,4 @@
 mod opengl;
-pub mod settings;
 
 use gl;
 
@@ -7,10 +6,12 @@ pub use imgui_glfw_rs::glfw::{self, Context};
 use imgui_glfw_rs::imgui;
 use imgui_glfw_rs::ImguiGLFW;
 
+pub use opengl::Load as Load;
 pub use opengl::Shader as Shader;
 pub use opengl::Vbo as Vbo;
 pub use opengl::Vao as Vao;
 pub use opengl::Utils as gl_utils;
+pub use opengl::WindowSettings as WindowSettings;
 
 use crate::app::App;
 
@@ -33,7 +34,7 @@ pub struct Runner {
     window: glfw::Window,
     events: std::sync::mpsc::Receiver<(f64, glfw::WindowEvent)>,
     glfw: glfw::Glfw,
-    window_settings: settings::WindowSettings,
+    window_settings: WindowSettings,
     frame_rate : f64,
     last_time: std::time::Instant,
     imgui: imgui::Context,
@@ -42,7 +43,7 @@ pub struct Runner {
 
 
 impl Runner {
-    pub fn new(mut app: App, ws: settings::WindowSettings) -> Self {
+    pub fn new(app: App, ws: WindowSettings) -> Self {
         let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
         glfw.window_hint(glfw::WindowHint::ContextVersion(ws.gl_version.0.clone(), ws.gl_version.1.clone()));
 
@@ -66,7 +67,6 @@ impl Runner {
         let mut imgui = imgui::Context::create();
         let imgui_glfw = ImguiGLFW::new(&mut imgui, &mut window);
 
-        
         Runner { 
             app: app, 
             window: window, 
