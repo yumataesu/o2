@@ -10,6 +10,7 @@ pub use opengl::Load as Load;
 pub use opengl::Shader as Shader;
 pub use opengl::Vbo as Vbo;
 pub use opengl::Vao as Vao;
+pub use opengl::VertexAttribute as VertexAttribute;
 pub use opengl::Utils as gl_utils;
 pub use opengl::WindowSettings as WindowSettings;
 

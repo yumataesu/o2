@@ -8,7 +8,9 @@ mod settings;
 pub use shader::Shader as Shader;
 pub use traits::Load as Load;
 pub use vbo::Vbo as Vbo;
+
 pub use vao::Vao as Vao;
+pub use vao::VertexAttribute as VertexAttribute;
 pub use utils::Utils as Utils;
 pub use settings::WindowSettings as WindowSettings;
 

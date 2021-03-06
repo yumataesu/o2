@@ -40,8 +40,9 @@ impl framework::BaseApp for App {
         self.color_vbo.allocate(colors);
 
         self.vao = framework::Vao::new();
-        self.vao.set_position_vbo(&self.position_vbo);
-        self.vao.set_color_vbo(&self.color_vbo);
+        self.vao.set_vbo(framework::VertexAttribute::Position, &self.position_vbo);
+        self.vao.set_vbo(framework::VertexAttribute::Color, &self.color_vbo);
+
     }
 
 

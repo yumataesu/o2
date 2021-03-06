@@ -1,5 +1,11 @@
 use super::vbo;
-
+#[derive(Debug, Copy, Clone)]
+pub enum VertexAttribute {
+    Position,
+    Color,
+    Texcoord,
+    Normal
+}
 #[derive(Debug, Default)]
 pub struct Vao {
     id: gl::types::GLuint
@@ -14,34 +20,34 @@ impl Vao {
         }
     }
 
-    pub fn set_position_vbo(&self, vbo: &vbo::Vbo) {
+    pub fn set_vbo(&self, attribute_type: VertexAttribute, vbo: &vbo::Vbo) {
+        let mut num: i32;
+        let location = attribute_type.clone() as gl::types::GLuint;
         unsafe {
             gl::BindVertexArray(self.id);
             gl::BindBuffer(gl::ARRAY_BUFFER, *vbo.get());
-            gl::EnableVertexAttribArray(0);
+            gl::EnableVertexAttribArray(location);
+            match attribute_type {
+                VertexAttribute::Position => {
+                    num = 3;
+                },
+                VertexAttribute::Color => {
+                    num = 3;
+                },
+                VertexAttribute::Texcoord => {
+                    num = 2;
+                },
+                VertexAttribute::Normal => {
+                    num = 3;
+                },
+            }
             gl::VertexAttribPointer(
-                0,
-                3,
+                location,
+                num,
                 gl::FLOAT,
                 0,
-                3 * std::mem::size_of::<f32>() as gl::types::GLsizei,
+                num * std::mem::size_of::<f32>() as gl::types::GLsizei,
                 std::ptr::null());
-        }
-    }
-
-    pub fn set_color_vbo(&self, vbo: &vbo::Vbo) {
-        unsafe {
-            gl::BindVertexArray(self.id);
-            gl::BindBuffer(gl::ARRAY_BUFFER, *vbo.get());
-            gl::EnableVertexAttribArray(1);
-            gl::VertexAttribPointer(
-                1,
-                3,
-                gl::FLOAT,
-                0,
-                3 * std::mem::size_of::<f32>() as gl::types::GLsizei,
-                std::ptr::null(),
-            );
         }
     }
 
