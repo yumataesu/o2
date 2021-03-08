@@ -5,7 +5,7 @@ use framework::Load;
 use framework::Allocate;
 
 use rand::distributions::*;
-use glam::*;
+use glam::Vec3;
 
 #[derive(Debug, Default)]
 pub struct App {
@@ -14,8 +14,8 @@ pub struct App {
     vao: framework::Vao,
     position_vbo: framework::Vbo,
     color_vbo: framework::Vbo,
-    p: Vec<glam::Vec3>,
-    c: Vec<glam::Vec3>,
+    positions: Vec<glam::Vec3>,
+    colors: Vec<glam::Vec3>,
     num: usize
 }
 
@@ -26,23 +26,23 @@ impl framework::BaseApp for App {
         self.shader = framework::Shader::new();
         self.shader.load("data/shader/shader");
 
-        self.num = 100;
+        self.num = 10;
         let prange = rand::distributions::Uniform::new(-1.0f32, 1.0);
         let crange = rand::distributions::Uniform::new(0.0f32, 1.0);
         let mut rng = rand::thread_rng();
         
-        self.p = Vec::with_capacity(self.num);
-        self.c = Vec::with_capacity(self.num);
+        self.positions = Vec::with_capacity(self.num);
+        self.colors = Vec::with_capacity(self.num);
         for i in 0..self.num {
-            self.p.push(glam::Vec3::new(prange.sample(&mut rng), prange.sample(&mut rng), 0.0));
-            self.c.push(glam::Vec3::new(crange.sample(&mut rng), crange.sample(&mut rng), crange.sample(&mut rng)));
+            self.positions.push(glam::Vec3::new(prange.sample(&mut rng), prange.sample(&mut rng), 0.0));
+            self.colors.push(glam::Vec3::new(crange.sample(&mut rng), crange.sample(&mut rng), crange.sample(&mut rng)));
         }
 
         self.position_vbo = framework::Vbo::new();
-        self.position_vbo.allocate(&self.p);
+        self.position_vbo.allocate(&self.positions);
 
         self.color_vbo = framework::Vbo::new();
-        self.color_vbo.allocate(&self.c);
+        self.color_vbo.allocate(&self.colors);
 
         self.vao = framework::Vao::new();
         self.vao.set_vbo(framework::VertexAttribute::Position, &self.position_vbo);
@@ -51,7 +51,15 @@ impl framework::BaseApp for App {
 
 
     fn update(&mut self) {
+        self.positions.clear();
 
+        let prange = rand::distributions::Uniform::new(-1.0f32, 1.0);
+        let mut rng = rand::thread_rng();
+        for i in 0..self.num {
+            self.positions.push(glam::Vec3::new(prange.sample(&mut rng), prange.sample(&mut rng), 0.0));
+        }
+
+        self.position_vbo.update(&self.positions);
     }
 
 

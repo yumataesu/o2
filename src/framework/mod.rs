@@ -16,8 +16,6 @@ pub use opengl::VertexAttribute as VertexAttribute;
 pub use opengl::Utils as gl_utils;
 pub use opengl::WindowSettings as WindowSettings;
 
-// pub crate::rand::Rng;
-
 use crate::app::App;
 
 pub trait BaseApp {

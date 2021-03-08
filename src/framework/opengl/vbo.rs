@@ -18,8 +18,17 @@ impl Allocate<&Vec<glam::Vec3>> for Vbo {
                 gl::ARRAY_BUFFER,
                 (v.len() * 3 * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr,
                 v.as_ptr() as *const _,
-                gl::STATIC_DRAW,
+                gl::DYNAMIC_DRAW,
             );
+        }
+    }
+
+    fn update(&mut self, v: &Vec<glam::Vec3>) {
+        unsafe {
+            gl::NamedBufferSubData(self.id, 0, (v.len() * 3 * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr, v.as_ptr() as *const _);
+            // self.bind();
+            // gl::BufferSubData(gl::ARRAY_BUFFER, 0, (v.len() * 3 * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr, v.as_ptr() as *const _);
+            // self.unbind();
         }
     }
 }
@@ -33,8 +42,17 @@ impl Allocate<&Vec<glam::Vec4>> for Vbo {
                 gl::ARRAY_BUFFER,
                 (v.len() * 4 * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr,
                 v.as_ptr() as *const _,
-                gl::STATIC_DRAW,
+                gl::DYNAMIC_DRAW,
             );
+        }
+    }
+
+    fn update(&mut self, v: &Vec<glam::Vec4>) {
+        unsafe {
+            gl::NamedBufferSubData(self.id, 0, (v.len() * 4 * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr, v.as_ptr() as *const _);
+            // self.bind();
+            // gl::BufferSubData(gl::ARRAY_BUFFER, 0, (v.len() * 4 * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr, v.as_ptr() as *const _);
+            // self.unbind();
         }
     }
 }
