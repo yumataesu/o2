@@ -1,3 +1,4 @@
+extern crate glam;
 mod opengl;
 
 use gl;
@@ -7,12 +8,15 @@ use imgui_glfw_rs::imgui;
 use imgui_glfw_rs::ImguiGLFW;
 
 pub use opengl::Load as Load;
+pub use opengl::Allocate as Allocate;
 pub use opengl::Shader as Shader;
 pub use opengl::Vbo as Vbo;
 pub use opengl::Vao as Vao;
 pub use opengl::VertexAttribute as VertexAttribute;
 pub use opengl::Utils as gl_utils;
 pub use opengl::WindowSettings as WindowSettings;
+
+// pub crate::rand::Rng;
 
 use crate::app::App;
 

@@ -2,47 +2,51 @@ use crate::framework::{self};
 use imgui_glfw_rs::glfw::{Key, Modifiers, MouseButton};
 use imgui_glfw_rs::imgui;
 use framework::Load;
+use framework::Allocate;
+
+use rand::distributions::*;
+use glam::*;
 
 #[derive(Debug, Default)]
 pub struct App {
-    number: i32,
     val: f32,
     shader: framework::Shader,
     vao: framework::Vao,
     position_vbo: framework::Vbo,
-    color_vbo: framework::Vbo
+    color_vbo: framework::Vbo,
+    p: Vec<glam::Vec3>,
+    c: Vec<glam::Vec3>,
+    num: usize
 }
 
 impl framework::BaseApp for App {
 
     fn setup(&mut self) {
         println!("setup");
-
         self.shader = framework::Shader::new();
         self.shader.load("data/shader/shader");
 
-        let vetices: Vec<f32> = vec![
-            -0.5, -0.5,  0.0,
-             0.0,  0.5,  0.0,
-             0.5, -0.5,  0.0
-        ];
-
-        let colors: Vec<f32> = vec![
-             1.0, 0.0, 0.0,
-             0.0, 1.0, 0.0,
-             0.0, 0.0, 1.0
-        ];
+        self.num = 100;
+        let prange = rand::distributions::Uniform::new(-1.0f32, 1.0);
+        let crange = rand::distributions::Uniform::new(0.0f32, 1.0);
+        let mut rng = rand::thread_rng();
+        
+        self.p = Vec::with_capacity(self.num);
+        self.c = Vec::with_capacity(self.num);
+        for i in 0..self.num {
+            self.p.push(glam::Vec3::new(prange.sample(&mut rng), prange.sample(&mut rng), 0.0));
+            self.c.push(glam::Vec3::new(crange.sample(&mut rng), crange.sample(&mut rng), crange.sample(&mut rng)));
+        }
 
         self.position_vbo = framework::Vbo::new();
-        self.position_vbo.allocate(vetices);
+        self.position_vbo.allocate(&self.p);
 
         self.color_vbo = framework::Vbo::new();
-        self.color_vbo.allocate(colors);
+        self.color_vbo.allocate(&self.c);
 
         self.vao = framework::Vao::new();
         self.vao.set_vbo(framework::VertexAttribute::Position, &self.position_vbo);
         self.vao.set_vbo(framework::VertexAttribute::Color, &self.color_vbo);
-
     }
 
 
