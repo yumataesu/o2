@@ -17,7 +17,7 @@ pub struct App {
     positions: Vec<glam::Vec3>,
     vel: Vec<glam::Vec3>,
     acc: Vec<glam::Vec3>,
-    colors: Vec<glam::Vec3>,
+    colors: Vec<glam::Vec4>,
     indices: Vec<u32>,
     num: usize,
     center: glam::Vec3
@@ -30,7 +30,7 @@ impl framework::BaseApp for App {
         self.shader = framework::Shader::new();
         self.shader.load("data/shader/shader");
 
-        self.num = 4000;
+        self.num = 400;
         let prange = rand::distributions::Uniform::new(-1.0f32, 1.0);
         let crange = rand::distributions::Uniform::new(0.0f32, 1.0);
         let mut rng = rand::thread_rng();
@@ -41,7 +41,7 @@ impl framework::BaseApp for App {
             self.positions.push(glam::Vec3::new(prange.sample(&mut rng), prange.sample(&mut rng), 0.0));
             self.vel.push(glam::Vec3::new(0.0, 0.0, 0.0));
             self.acc.push(glam::Vec3::new(0.0, 0.0, 0.0));
-            self.colors.push(glam::Vec3::new(crange.sample(&mut rng), crange.sample(&mut rng), 1.0));
+            self.colors.push(glam::Vec4::new(crange.sample(&mut rng), crange.sample(&mut rng), crange.sample(&mut rng), 1.0));
         }
 
         self.indices.push(0);
@@ -64,7 +64,7 @@ impl framework::BaseApp for App {
         self.vao = framework::Vao::new();
         self.vao.set_vbo(&self.position_vbo);
         self.vao.set_vbo(&self.color_vbo);
-        // self.vao.set_ebo(&self.ebo);
+        //self.vao.set_vbo(&self.ebo);
     }
 
 
@@ -85,7 +85,7 @@ impl framework::BaseApp for App {
         framework::gl_utils::clear_color(0.1, 0.1, 0.1, 1.0);
         framework::gl_utils::clear();
         self.shader.begin();
-        self.vao.draw();
+        self.vao.draw(gl::TRIANGLES);
         self.shader.end();
     }
 

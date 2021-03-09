@@ -53,22 +53,23 @@ impl Allocate<(Attribute, &Vec<glam::Vec3>)> for BufferObject {
 
 impl Allocate<(Attribute, &Vec<u32>)> for BufferObject {
     fn allocate(&mut self, args: (Attribute, &Vec<u32>)) {
-        // self.attribute = args.0.clone();
-
-        // unsafe {
-        //     match self.attribute {
-        //         Attribute::Index => {
-        //             gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, self.id);
-        //             gl::BufferData(
-        //                 gl::ELEMENT_ARRAY_BUFFER,
-        //                 (args.1.len() * 1 * std::mem::size_of::<u32>()) as gl::types::GLsizeiptr,
-        //                 args.1.as_ptr() as *const _,
-        //                 gl::STATIC_DRAW,
-        //             );
-        //         },
-        //         _ => ()
-        //     }
-        // }
+        self.attribute = args.0.clone();
+        self.num_verts = args.1.len() as i32;
+        
+        unsafe {
+            match self.attribute {
+                Attribute::Index => {
+                    gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, self.id);
+                    gl::BufferData(
+                        gl::ELEMENT_ARRAY_BUFFER,
+                        (args.1.len() * 1 * std::mem::size_of::<u32>()) as gl::types::GLsizeiptr,
+                        args.1.as_ptr() as *const _,
+                        gl::STATIC_DRAW,
+                    );
+                },
+                _ => ()
+            }
+        }
     }
 }
 

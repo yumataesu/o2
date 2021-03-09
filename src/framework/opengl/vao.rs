@@ -4,6 +4,7 @@ use super::bufferobject;
 #[derive(Debug, Default)]
 pub struct Vao {
     id: gl::types::GLuint,
+    num_indices: i32,
     num_vertex: i32
 }
 
@@ -13,7 +14,7 @@ impl Vao {
         unsafe {
             let mut id = std::mem::zeroed();
             gl::GenVertexArrays(1, &mut id);
-            Vao { id: id, num_vertex: 0 }
+            Vao { id: id, num_vertex: 0, num_indices: 0 }
         }
     }
 
@@ -21,8 +22,9 @@ impl Vao {
     pub fn set_vbo(&mut self, vbo: &bufferobject::BufferObject) {
         let mut num: i32;
         let mut location: u32;
-
+        self.num_vertex = vbo.get_num_verts();
         unsafe {
+            gl::BindVertexArray(self.id);
             match vbo.get_attribute() {
                 bufferobject::Attribute::Position => {
                     num = 3;
@@ -41,12 +43,12 @@ impl Vao {
                     location = 3;
                 },
                 bufferobject::Attribute::Index => {
+                    self.num_indices = vbo.get_num_verts();
+                    gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, *vbo.get());
                     return;
                 }
             }
-            //let location = vbo.get_attribute().clone() as gl::types::GLuint;
-            self.num_vertex = vbo.get_num_verts();
-            gl::BindVertexArray(self.id);
+
             gl::BindBuffer(gl::ARRAY_BUFFER, *vbo.get());
             gl::EnableVertexAttribArray(location);
             gl::VertexAttribPointer(
@@ -60,24 +62,24 @@ impl Vao {
     }
 
 
-    pub fn set_ebo(&mut self, ebo: &bufferobject::BufferObject) {
-        unsafe {
-            gl::BindVertexArray(self.id);
-            gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, *ebo.get());
-        }
-    }
-
 
     pub fn get(&self) -> &gl::types::GLuint {
         &self.id
     }
 
 
-    pub fn draw(&self) {
+    pub fn draw(&self, draw_type: gl::types::GLenum) {
         unsafe {
             gl::BindVertexArray(self.id);
-            gl::DrawArrays(gl::LINES, 0, self.num_vertex);
-            // gl::DrawElements( gl::TRIANGLES, 6, gl::UNSIGNED_INT, std::ptr::null() );
+            gl::DrawArrays(draw_type, 0, self.num_vertex);
+            gl::BindVertexArray(0);
+        }
+    }
+
+    pub fn draw_elements(&self, draw_type: gl::types::GLenum) {
+        unsafe {
+            gl::BindVertexArray(self.id);
+            gl::DrawElements(draw_type, self.num_indices, gl::UNSIGNED_INT, std::ptr::null());
             gl::BindVertexArray(0);
         }
     }
