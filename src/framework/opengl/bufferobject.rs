@@ -10,6 +10,7 @@ pub enum Attribute {
     Normal,
 }
 
+
 impl Default for Attribute {
     fn default() -> Self { Attribute::Index }
 }
@@ -31,13 +32,6 @@ impl Allocate<(Attribute, &Vec<glam::Vec3>)> for BufferObject {
         unsafe {
             match self.attribute {
                 Attribute::Index => {
-                    gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, self.id);
-                    gl::BufferData(
-                        gl::ELEMENT_ARRAY_BUFFER,
-                        (args.1.len() * 1 * std::mem::size_of::<u32>()) as gl::types::GLsizeiptr,
-                        args.1.as_ptr() as *const _,
-                        gl::STATIC_DRAW,
-                    );
                 },
                 _ => {
                     gl::BindBuffer(gl::ARRAY_BUFFER, self.id);
@@ -49,18 +43,32 @@ impl Allocate<(Attribute, &Vec<glam::Vec3>)> for BufferObject {
                     );
                 }
             }
-
         }
     }
 }
 
 
 
-impl Update<(&Vec<glam::Vec3>)> for BufferObject {
-    fn update(&mut self, v: &Vec<glam::Vec3>) {
-        unsafe {
-            gl::NamedBufferSubData(self.id, 0, (v.len() * 3 * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr, v.as_ptr() as *const _);
-        }
+
+
+impl Allocate<(Attribute, &Vec<u32>)> for BufferObject {
+    fn allocate(&mut self, args: (Attribute, &Vec<u32>)) {
+        // self.attribute = args.0.clone();
+
+        // unsafe {
+        //     match self.attribute {
+        //         Attribute::Index => {
+        //             gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, self.id);
+        //             gl::BufferData(
+        //                 gl::ELEMENT_ARRAY_BUFFER,
+        //                 (args.1.len() * 1 * std::mem::size_of::<u32>()) as gl::types::GLsizeiptr,
+        //                 args.1.as_ptr() as *const _,
+        //                 gl::STATIC_DRAW,
+        //             );
+        //         },
+        //         _ => ()
+        //     }
+        // }
     }
 }
 
@@ -74,13 +82,6 @@ impl Allocate<(Attribute, &Vec<glam::Vec4>)> for BufferObject {
         unsafe {
             match self.attribute {
                 Attribute::Index => {
-                    gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, self.id);
-                    gl::BufferData(
-                        gl::ELEMENT_ARRAY_BUFFER,
-                        (args.1.len() * 1 * std::mem::size_of::<u32>()) as gl::types::GLsizeiptr,
-                        args.1.as_ptr() as *const _,
-                        gl::STATIC_DRAW,
-                    );
                 },
                 _ => {
                     gl::BindBuffer(gl::ARRAY_BUFFER, self.id);
@@ -96,6 +97,14 @@ impl Allocate<(Attribute, &Vec<glam::Vec4>)> for BufferObject {
     }
 }
 
+
+impl Update<(&Vec<glam::Vec3>)> for BufferObject {
+    fn update(&mut self, v: &Vec<glam::Vec3>) {
+        unsafe {
+            gl::NamedBufferSubData(self.id, 0, (v.len() * 3 * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr, v.as_ptr() as *const _);
+        }
+    }
+}
 
 
 impl Update<(&Vec<glam::Vec4>)> for BufferObject {

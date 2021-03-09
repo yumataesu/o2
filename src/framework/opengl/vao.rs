@@ -76,7 +76,8 @@ impl Vao {
     pub fn draw(&self) {
         unsafe {
             gl::BindVertexArray(self.id);
-            gl::DrawArrays(gl::POINTS, 0, self.num_vertex);
+            gl::DrawArrays(gl::LINES, 0, self.num_vertex);
+            // gl::DrawElements( gl::TRIANGLES, 6, gl::UNSIGNED_INT, std::ptr::null() );
             gl::BindVertexArray(0);
         }
     }

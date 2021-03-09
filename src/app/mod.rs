@@ -11,12 +11,14 @@ pub struct App {
     val: f32,
     shader: framework::Shader,
     vao: framework::Vao,
+    ebo: framework::BufferObject,
     position_vbo: framework::BufferObject,
     color_vbo: framework::BufferObject,
     positions: Vec<glam::Vec3>,
     vel: Vec<glam::Vec3>,
     acc: Vec<glam::Vec3>,
     colors: Vec<glam::Vec3>,
+    indices: Vec<u32>,
     num: usize,
     center: glam::Vec3
 }
@@ -28,7 +30,7 @@ impl framework::BaseApp for App {
         self.shader = framework::Shader::new();
         self.shader.load("data/shader/shader");
 
-        self.num = 100000;
+        self.num = 4000;
         let prange = rand::distributions::Uniform::new(-1.0f32, 1.0);
         let crange = rand::distributions::Uniform::new(0.0f32, 1.0);
         let mut rng = rand::thread_rng();
@@ -42,15 +44,27 @@ impl framework::BaseApp for App {
             self.colors.push(glam::Vec3::new(crange.sample(&mut rng), crange.sample(&mut rng), 1.0));
         }
 
+        self.indices.push(0);
+        self.indices.push(1);
+        self.indices.push(2);
+        self.indices.push(0);
+        self.indices.push(3);
+        self.indices.push(2);
+
+
         self.position_vbo = framework::BufferObject::new();
         self.position_vbo.allocate((framework::VertexAttribute::Position, &self.positions));
 
         self.color_vbo = framework::BufferObject::new();
         self.color_vbo.allocate((framework::VertexAttribute::Color, &self.positions));
 
+        //self.ebo = framework::BufferObject::new();
+        //self.ebo.allocate((framework::VertexAttribute::Index, &self.indices));
+
         self.vao = framework::Vao::new();
         self.vao.set_vbo(&self.position_vbo);
         self.vao.set_vbo(&self.color_vbo);
+        // self.vao.set_ebo(&self.ebo);
     }
 
 
@@ -63,7 +77,7 @@ impl framework::BaseApp for App {
             self.vel[i] += self.acc[i] * 0.001;
             self.positions[i] += self.vel[i];
         }
-        self.position_vbo.update(&self.positions);
+        //self.position_vbo.update(&self.positions);
     }
 
 
