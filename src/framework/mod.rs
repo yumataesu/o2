@@ -9,10 +9,11 @@ use imgui_glfw_rs::ImguiGLFW;
 
 pub use opengl::Load as Load;
 pub use opengl::Allocate as Allocate;
+pub use opengl::Update as Update;
 pub use opengl::Shader as Shader;
-pub use opengl::Vbo as Vbo;
+pub use opengl::Attribute as VertexAttribute;
+pub use opengl::BufferObject as BufferObject;
 pub use opengl::Vao as Vao;
-pub use opengl::VertexAttribute as VertexAttribute;
 pub use opengl::Utils as gl_utils;
 pub use opengl::WindowSettings as WindowSettings;
 
@@ -27,7 +28,7 @@ pub trait BaseApp {
     fn key_released(&mut self, key: glfw::Key, modifiers: glfw::Modifiers);
     fn mouse_pressed(&mut self, button: glfw::MouseButton);
     fn mouse_released(&mut self, button: glfw::MouseButton);
-    fn cursor_moved(&mut self, x: f64, y: f64);
+    fn cursor_moved(&mut self, x: f32, y: f32);
     fn file_dropped(&mut self, paths: Vec<std::path::PathBuf>);
 }
 
@@ -130,7 +131,7 @@ impl Runner {
                             glfw::Action::Repeat => {}
                         }
                     },
-                    glfw::WindowEvent::CursorPos(x, y) => { self.app.cursor_moved(x, y); },
+                    glfw::WindowEvent::CursorPos(x, y) => { self.app.cursor_moved(x as f32, y as f32); },
                     glfw::WindowEvent::FileDrop(paths) => { self.app.file_dropped(paths); }
                     _ => {}
                 }

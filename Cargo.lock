@@ -5,14 +5,12 @@ name = "Lazarus"
 version = "0.1.0"
 dependencies = [
  "gl",
- "gl_generator 0.14.0",
  "glam",
  "glfw 0.41.0",
  "image",
  "imgui 0.7.0",
  "imgui-glfw-rs",
  "imgui-opengl-renderer 0.11.0",
- "libc",
  "rand 0.8.3",
  "regex",
  "takeable-option",

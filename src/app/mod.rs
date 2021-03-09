@@ -1,8 +1,7 @@
 use crate::framework::{self};
 use imgui_glfw_rs::glfw::{Key, Modifiers, MouseButton};
 use imgui_glfw_rs::imgui;
-use framework::Load;
-use framework::Allocate;
+use framework::{Load, Allocate, Update};
 
 use rand::distributions::*;
 use glam::Vec3;
@@ -12,11 +11,14 @@ pub struct App {
     val: f32,
     shader: framework::Shader,
     vao: framework::Vao,
-    position_vbo: framework::Vbo,
-    color_vbo: framework::Vbo,
+    position_vbo: framework::BufferObject,
+    color_vbo: framework::BufferObject,
     positions: Vec<glam::Vec3>,
+    vel: Vec<glam::Vec3>,
+    acc: Vec<glam::Vec3>,
     colors: Vec<glam::Vec3>,
-    num: usize
+    num: usize,
+    center: glam::Vec3
 }
 
 impl framework::BaseApp for App {
@@ -26,7 +28,7 @@ impl framework::BaseApp for App {
         self.shader = framework::Shader::new();
         self.shader.load("data/shader/shader");
 
-        self.num = 10;
+        self.num = 100000;
         let prange = rand::distributions::Uniform::new(-1.0f32, 1.0);
         let crange = rand::distributions::Uniform::new(0.0f32, 1.0);
         let mut rng = rand::thread_rng();
@@ -35,30 +37,32 @@ impl framework::BaseApp for App {
         self.colors = Vec::with_capacity(self.num);
         for i in 0..self.num {
             self.positions.push(glam::Vec3::new(prange.sample(&mut rng), prange.sample(&mut rng), 0.0));
-            self.colors.push(glam::Vec3::new(crange.sample(&mut rng), crange.sample(&mut rng), crange.sample(&mut rng)));
+            self.vel.push(glam::Vec3::new(0.0, 0.0, 0.0));
+            self.acc.push(glam::Vec3::new(0.0, 0.0, 0.0));
+            self.colors.push(glam::Vec3::new(crange.sample(&mut rng), crange.sample(&mut rng), 1.0));
         }
 
-        self.position_vbo = framework::Vbo::new();
-        self.position_vbo.allocate(&self.positions);
+        self.position_vbo = framework::BufferObject::new();
+        self.position_vbo.allocate((framework::VertexAttribute::Position, &self.positions));
 
-        self.color_vbo = framework::Vbo::new();
-        self.color_vbo.allocate(&self.colors);
+        self.color_vbo = framework::BufferObject::new();
+        self.color_vbo.allocate((framework::VertexAttribute::Color, &self.positions));
 
         self.vao = framework::Vao::new();
-        self.vao.set_vbo(framework::VertexAttribute::Position, &self.position_vbo);
-        self.vao.set_vbo(framework::VertexAttribute::Color, &self.color_vbo);
+        self.vao.set_vbo(&self.position_vbo);
+        self.vao.set_vbo(&self.color_vbo);
     }
 
 
     fn update(&mut self) {
-        self.positions.clear();
-
-        let prange = rand::distributions::Uniform::new(-1.0f32, 1.0);
-        let mut rng = rand::thread_rng();
         for i in 0..self.num {
-            self.positions.push(glam::Vec3::new(prange.sample(&mut rng), prange.sample(&mut rng), 0.0));
-        }
+            self.acc[i] = glam::Vec3::new(0.0,0.0,0.0);
 
+            self.acc[i] = self.center - self.positions[i];
+            self.acc[i] = self.acc[i].normalize()* 0.1;
+            self.vel[i] += self.acc[i] * 0.001;
+            self.positions[i] += self.vel[i];
+        }
         self.position_vbo.update(&self.positions);
     }
 
@@ -99,7 +103,8 @@ impl framework::BaseApp for App {
         // println!("file_dropped {:?}", paths);
     }
 
-    fn cursor_moved(&mut self, x: f64, y: f64) {
+    fn cursor_moved(&mut self, x: f32, y: f32) {
         // println!("cursor_moved {}, {}", x, y);
+        self.center = glam::Vec3::new(x / 1920.0f32 * 2.0 - 1.0, 1.0 - (y / 1080.0f32 * 2.0 - 1.0), 0.0);
     }
 }
