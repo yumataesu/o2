@@ -6,6 +6,9 @@ use framework::{Load, Allocate, Update};
 use rand::distributions::*;
 use glam::Vec3;
 
+use image::io::Reader as ImageReader;
+
+
 #[derive(Debug, Default)]
 pub struct App {
     val: f32,
@@ -14,23 +17,25 @@ pub struct App {
     ebo: framework::BufferObject,
     position_vbo: framework::BufferObject,
     color_vbo: framework::BufferObject,
+    texcoord_vbo: framework::BufferObject,
     positions: Vec<glam::Vec3>,
     vel: Vec<glam::Vec3>,
     acc: Vec<glam::Vec3>,
     colors: Vec<glam::Vec4>,
+    texcoords: Vec<glam::Vec2>,
     indices: Vec<u32>,
     num: usize,
-    center: glam::Vec3
+    center: glam::Vec3,
+    tex: framework::Texture
 }
 
 impl framework::BaseApp for App {
 
     fn setup(&mut self) {
-        println!("setup");
         self.shader = framework::Shader::new();
         self.shader.load("data/shader/shader");
 
-        self.num = 400;
+        self.num = 4;
         let prange = rand::distributions::Uniform::new(-1.0f32, 1.0);
         let crange = rand::distributions::Uniform::new(0.0f32, 1.0);
         let mut rng = rand::thread_rng();
@@ -44,19 +49,23 @@ impl framework::BaseApp for App {
             self.colors.push(glam::Vec4::new(crange.sample(&mut rng), crange.sample(&mut rng), crange.sample(&mut rng), 1.0));
         }
 
-        self.indices.push(0);
-        self.indices.push(1);
-        self.indices.push(2);
-        self.indices.push(0);
-        self.indices.push(3);
-        self.indices.push(2);
+        self.texcoords.push(glam::Vec2::new(0.0, 0.0));
+        self.texcoords.push(glam::Vec2::new(1.0, 0.0));
+        self.texcoords.push(glam::Vec2::new(1.0, 1.0));
+        self.texcoords.push(glam::Vec2::new(0.0, 1.0));
 
+        self.tex = framework::Texture::default();
+        self.tex.allocate(1280, 720);
+        self.tex.load();
 
         self.position_vbo = framework::BufferObject::new();
         self.position_vbo.allocate((framework::VertexAttribute::Position, &self.positions));
 
         self.color_vbo = framework::BufferObject::new();
-        self.color_vbo.allocate((framework::VertexAttribute::Color, &self.positions));
+        self.color_vbo.allocate((framework::VertexAttribute::Color, &self.colors));
+
+        self.texcoord_vbo = framework::BufferObject::new();
+        self.texcoord_vbo.allocate((framework::VertexAttribute::Texcoord, &self.texcoords));
 
         //self.ebo = framework::BufferObject::new();
         //self.ebo.allocate((framework::VertexAttribute::Index, &self.indices));
@@ -64,6 +73,7 @@ impl framework::BaseApp for App {
         self.vao = framework::Vao::new();
         self.vao.set_vbo(&self.position_vbo);
         self.vao.set_vbo(&self.color_vbo);
+        self.vao.set_vbo(&self.texcoord_vbo);
         //self.vao.set_vbo(&self.ebo);
     }
 
@@ -85,6 +95,7 @@ impl framework::BaseApp for App {
         framework::gl_utils::clear_color(0.1, 0.1, 0.1, 1.0);
         framework::gl_utils::clear();
         self.shader.begin();
+        self.shader.unifrom_texture("u_src", *self.tex.get());
         self.vao.draw(gl::TRIANGLES);
         self.shader.end();
     }

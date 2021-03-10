@@ -48,6 +48,30 @@ impl Allocate<(Attribute, &Vec<glam::Vec3>)> for BufferObject {
 }
 
 
+impl Allocate<(Attribute, &Vec<glam::Vec2>)> for BufferObject {
+    fn allocate(&mut self, args: (Attribute, &Vec<glam::Vec2>)) {
+        self.attribute = args.0.clone();
+        self.num_verts = args.1.len() as i32;
+
+        unsafe {
+            match self.attribute {
+                Attribute::Index => {
+                },
+                _ => {
+                    gl::BindBuffer(gl::ARRAY_BUFFER, self.id);
+                    gl::BufferData(
+                        gl::ARRAY_BUFFER,
+                        (args.1.len() * 2 * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr,
+                        args.1.as_ptr() as *const _,
+                        gl::DYNAMIC_DRAW,
+                    );
+                }
+            }
+        }
+    }
+}
+
+
 
 
 
@@ -55,7 +79,7 @@ impl Allocate<(Attribute, &Vec<u32>)> for BufferObject {
     fn allocate(&mut self, args: (Attribute, &Vec<u32>)) {
         self.attribute = args.0.clone();
         self.num_verts = args.1.len() as i32;
-        
+
         unsafe {
             match self.attribute {
                 Attribute::Index => {
