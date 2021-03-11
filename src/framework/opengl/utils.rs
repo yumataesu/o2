@@ -10,11 +10,5 @@ pub mod Utils {
             gl::Clear(gl::COLOR_BUFFER_BIT);
         }
     }
-    
-    enum DrawType {
-        Point,
-        Fill,
-        Wireframe
-    }
 }
 

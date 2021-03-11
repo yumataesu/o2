@@ -29,9 +29,9 @@ impl Texture {
         }
     }
 
-    
+
     pub fn load(&mut self, path: &str) {
-        let img = image::open("data/te.jpg").expect("Failed to load texture");
+        let img = image::open(path).expect("Failed to load texture");
         let (w, h) = img.dimensions();
         let data = img.raw_pixels();
         unsafe {

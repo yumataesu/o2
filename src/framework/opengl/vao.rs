@@ -1,6 +1,6 @@
 use super::bufferobject;
 
-
+//todo ; 参照を保持するようにしたい
 #[derive(Debug, Default)]
 pub struct Vao {
     id: gl::types::GLuint,

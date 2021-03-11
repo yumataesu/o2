@@ -32,7 +32,8 @@ impl Load<(&str, &str)> for Shader {
 impl Shader {
     pub fn new() -> Self {
         unsafe {
-            Shader { program: gl::CreateProgram(), vertex_src: String::new(), fragment_src: String::new() }
+            let mut program = gl::CreateProgram();
+            Shader { program: program, vertex_src: String::new(), fragment_src: String::new() }
         }
     }
 

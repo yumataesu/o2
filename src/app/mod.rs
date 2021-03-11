@@ -106,6 +106,8 @@ impl framework::BaseApp for App {
 
     fn key_pressed(&mut self, key: Key, modifiers: Modifiers) {
         // println!("key_pressed {:?}", key);
+        self.shader = framework::Shader::new();
+        self.shader.load("data/shader/shader");
     }
 
     fn key_released(&mut self, key: Key, modifiers: Modifiers) {
