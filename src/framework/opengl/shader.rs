@@ -55,11 +55,9 @@ impl Shader {
         }
     }
 
-    pub fn unifrom_texture(&self, name: &str, id: gl::types::GLuint) {
+    pub fn uniform_texture(&self, name: &str, id: &gl::types::GLuint) {
         unsafe {
-            //gl::ActiveTexture(gl::TEXTURE0);
-            gl::BindTexture(gl::TEXTURE_2D, id);
-            //gl::ActiveTexture(gl::TEXTURE0);
+            gl::BindTexture(gl::TEXTURE_2D, *id);
         }
     }
 

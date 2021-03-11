@@ -6,9 +6,6 @@ use framework::{Load, Allocate, Update};
 use rand::distributions::*;
 use glam::Vec3;
 
-use image::io::Reader as ImageReader;
-
-
 #[derive(Debug, Default)]
 pub struct App {
     val: f32,
@@ -26,7 +23,8 @@ pub struct App {
     indices: Vec<u32>,
     num: usize,
     center: glam::Vec3,
-    tex: framework::Texture
+    tex: framework::Texture,
+
 }
 
 impl framework::BaseApp for App {
@@ -39,7 +37,7 @@ impl framework::BaseApp for App {
         let prange = rand::distributions::Uniform::new(-1.0f32, 1.0);
         let crange = rand::distributions::Uniform::new(0.0f32, 1.0);
         let mut rng = rand::thread_rng();
-        
+
         self.positions = Vec::with_capacity(self.num);
         self.colors = Vec::with_capacity(self.num);
         for i in 0..self.num {
@@ -54,9 +52,8 @@ impl framework::BaseApp for App {
         self.texcoords.push(glam::Vec2::new(1.0, 1.0));
         self.texcoords.push(glam::Vec2::new(0.0, 1.0));
 
-        self.tex = framework::Texture::default();
-        self.tex.allocate(1280, 720);
-        self.tex.load();
+        self.tex = framework::Texture::new();
+        self.tex.load("data/te.jpg");
 
         self.position_vbo = framework::BufferObject::new();
         self.position_vbo.allocate((framework::VertexAttribute::Position, &self.positions));
@@ -81,13 +78,12 @@ impl framework::BaseApp for App {
     fn update(&mut self) {
         for i in 0..self.num {
             self.acc[i] = glam::Vec3::new(0.0,0.0,0.0);
-
             self.acc[i] = self.center - self.positions[i];
             self.acc[i] = self.acc[i].normalize()* 0.1;
             self.vel[i] += self.acc[i] * 0.001;
             self.positions[i] += self.vel[i];
         }
-        //self.position_vbo.update(&self.positions);
+        self.position_vbo.update(&self.positions);
     }
 
 
@@ -95,7 +91,7 @@ impl framework::BaseApp for App {
         framework::gl_utils::clear_color(0.1, 0.1, 0.1, 1.0);
         framework::gl_utils::clear();
         self.shader.begin();
-        self.shader.unifrom_texture("u_src", *self.tex.get());
+        self.shader.uniform_texture("u_src", self.tex.get());
         self.vao.draw(gl::TRIANGLES);
         self.shader.end();
     }
