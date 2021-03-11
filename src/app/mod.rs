@@ -24,7 +24,6 @@ pub struct App {
     num: usize,
     center: glam::Vec3,
     tex: framework::Texture,
-
 }
 
 impl framework::BaseApp for App {
@@ -33,7 +32,7 @@ impl framework::BaseApp for App {
         self.shader = framework::Shader::new();
         self.shader.load("data/shader/shader");
 
-        self.num = 4;
+        self.num = 10000;
         let prange = rand::distributions::Uniform::new(-1.0f32, 1.0);
         let crange = rand::distributions::Uniform::new(0.0f32, 1.0);
         let mut rng = rand::thread_rng();
@@ -47,10 +46,10 @@ impl framework::BaseApp for App {
             self.colors.push(glam::Vec4::new(crange.sample(&mut rng), crange.sample(&mut rng), crange.sample(&mut rng), 1.0));
         }
 
-        self.texcoords.push(glam::Vec2::new(0.0, 0.0));
-        self.texcoords.push(glam::Vec2::new(1.0, 0.0));
-        self.texcoords.push(glam::Vec2::new(1.0, 1.0));
-        self.texcoords.push(glam::Vec2::new(0.0, 1.0));
+        // self.texcoords.push(glam::Vec2::new(0.0, 0.0));
+        // self.texcoords.push(glam::Vec2::new(1.0, 0.0));
+        // self.texcoords.push(glam::Vec2::new(1.0, 1.0));
+        // self.texcoords.push(glam::Vec2::new(0.0, 1.0));
 
         self.tex = framework::Texture::new();
         self.tex.load("data/te.jpg");
@@ -70,7 +69,7 @@ impl framework::BaseApp for App {
         self.vao = framework::Vao::new();
         self.vao.set_vbo(&self.position_vbo);
         self.vao.set_vbo(&self.color_vbo);
-        self.vao.set_vbo(&self.texcoord_vbo);
+        //self.vao.set_vbo(&self.texcoord_vbo);
         //self.vao.set_vbo(&self.ebo);
     }
 
@@ -92,7 +91,7 @@ impl framework::BaseApp for App {
         framework::gl_utils::clear();
         self.shader.begin();
         self.shader.uniform_texture("u_src", self.tex.get());
-        self.vao.draw(gl::TRIANGLES);
+        self.vao.draw(gl::POINTS);
         self.shader.end();
     }
 
