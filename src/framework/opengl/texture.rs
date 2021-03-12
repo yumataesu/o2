@@ -53,6 +53,7 @@ impl Texture {
             gl::BindTexture(gl::TEXTURE_2D, self.id);
             gl::TexParameterf(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, self.wrap_horizontal as f32);
             gl::TexParameterf(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, self.wrap_vertical as f32);
+            gl::BindTexture(gl::TEXTURE_2D, 0);
         }
         self
     }
@@ -64,6 +65,7 @@ impl Texture {
             gl::BindTexture(gl::TEXTURE_2D, self.id);
             gl::TexParameterf(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, self.min_filter as f32);
             gl::TexParameterf(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, self.mag_filter as f32);
+            gl::BindTexture(gl::TEXTURE_2D, 0);
         }
         self
     }
