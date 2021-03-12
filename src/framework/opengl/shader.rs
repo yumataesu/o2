@@ -1,5 +1,40 @@
 use super::traits::Load;
 
+const VS_SRC: &'static [u8] = b"
+#version 450
+
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec4 color;
+layout (location = 2) in vec2 texcoord;
+
+out vec4 v_color;
+out vec2 v_texcoord;
+
+void main() {
+    gl_Position = vec4(position, 1.0);
+    v_color = color;
+    v_texcoord = texcoord;
+}
+\0";
+
+const FS_SRC: &'static [u8] = b"
+#version 450
+
+in vec4 v_color;
+in vec2 v_texcoord;
+
+uniform sampler2D u_src;
+
+layout (location = 0) out vec4 FragColor;
+
+void main() {
+    FragColor = vec4(1, 1, 1, 1);
+    // FragColor = vec4(v_texcoord, 0, 1);
+    FragColor = texture(u_src, v_texcoord);
+}
+\0";
+
+
 #[derive(Debug, Default)]
 pub struct Shader {
     program: gl::types::GLuint,
@@ -64,17 +99,17 @@ impl Shader {
 
     fn load(&mut self) {
         //println!("self.program {}", self.program);
-        println!("self.vertex_src {}", self.vertex_src);
-        println!("self.fragment {}", self.fragment_src);
+        //println!("self.vertex_src {}", self.vertex_src);
+        //println!("self.fragment {}", self.fragment_src);
         
         unsafe {
             let vs = gl::CreateShader(gl::VERTEX_SHADER);
-            gl::ShaderSource(vs, 1, [self.vertex_src.as_bytes().as_ptr() as *const _].as_ptr(), std::ptr::null());
+            gl::ShaderSource(vs, 1, [VS_SRC.as_ptr() as *const _].as_ptr(), std::ptr::null());
             gl::CompileShader(vs);
             self.check_compile_errors(vs, "vertex");
 
             let fs = gl::CreateShader(gl::FRAGMENT_SHADER);
-            gl::ShaderSource(fs, 1, [self.fragment_src.as_bytes().as_ptr() as *const _].as_ptr(), std::ptr::null());
+            gl::ShaderSource(fs, 1, [FS_SRC.as_ptr() as *const _].as_ptr(), std::ptr::null());
             gl::CompileShader(fs);
             self.check_compile_errors(fs, "fragment");
 
@@ -92,6 +127,7 @@ impl Shader {
 
 
     /// utility function for checking shader compilation/linking errors.
+    /// https://github.com/bwasty/learn-opengl-rs/blob/master/src/shader.rs#L102
     /// ------------------------------------------------------------------------
     unsafe fn check_compile_errors(&self, shader: u32, type_: &str) {
         let mut success = gl::FALSE as gl::types::GLint;
@@ -104,7 +140,7 @@ impl Shader {
                 println!("ERROR::SHADER_COMPILATION_ERROR of type: {}\n{:?}\n \
                           -- --------------------------------------------------- -- ",
                          type_,
-                         infoLog);
+                         std::str::from_utf8(&infoLog).expect("Found invalid UTF-8"));
             }
 
         } else {
