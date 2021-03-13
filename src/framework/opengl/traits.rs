@@ -3,7 +3,7 @@ pub trait Load<T> {
 }
 
 pub trait Allocate<T> {
-    fn allocate(&mut self, arg: T);
+    fn allocate(&mut self, arg: T) -> &mut Self;
 }
 
 pub trait Update<T> {

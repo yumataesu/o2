@@ -25,7 +25,7 @@ pub struct BufferObject {
 
 
 impl Allocate<(Attribute, &Vec<glam::Vec3>)> for BufferObject {
-    fn allocate(&mut self, args: (Attribute, &Vec<glam::Vec3>)) {
+    fn allocate(&mut self, args: (Attribute, &Vec<glam::Vec3>)) -> &mut Self {
         self.attribute = args.0.clone();
         self.num_verts = args.1.len() as i32;
 
@@ -43,13 +43,15 @@ impl Allocate<(Attribute, &Vec<glam::Vec3>)> for BufferObject {
                     );
                 }
             }
+
+            self
         }
     }
 }
 
 
 impl Allocate<(Attribute, &Vec<glam::Vec2>)> for BufferObject {
-    fn allocate(&mut self, args: (Attribute, &Vec<glam::Vec2>)) {
+    fn allocate(&mut self, args: (Attribute, &Vec<glam::Vec2>)) -> &mut Self {
         self.attribute = args.0.clone();
         self.num_verts = args.1.len() as i32;
 
@@ -67,6 +69,7 @@ impl Allocate<(Attribute, &Vec<glam::Vec2>)> for BufferObject {
                     );
                 }
             }
+            self
         }
     }
 }
@@ -76,7 +79,7 @@ impl Allocate<(Attribute, &Vec<glam::Vec2>)> for BufferObject {
 
 
 impl Allocate<(Attribute, &Vec<u32>)> for BufferObject {
-    fn allocate(&mut self, args: (Attribute, &Vec<u32>)) {
+    fn allocate(&mut self, args: (Attribute, &Vec<u32>)) -> &mut Self {
         self.attribute = args.0.clone();
         self.num_verts = args.1.len() as i32;
 
@@ -93,6 +96,7 @@ impl Allocate<(Attribute, &Vec<u32>)> for BufferObject {
                 },
                 _ => ()
             }
+            self
         }
     }
 }
@@ -100,7 +104,7 @@ impl Allocate<(Attribute, &Vec<u32>)> for BufferObject {
 
 
 impl Allocate<(Attribute, &Vec<glam::Vec4>)> for BufferObject {
-    fn allocate(&mut self, args: (Attribute, &Vec<glam::Vec4>)) {
+    fn allocate(&mut self, args: (Attribute, &Vec<glam::Vec4>)) -> &mut Self {
         self.attribute = args.0.clone();
         self.num_verts = args.1.len() as i32;
 
@@ -118,6 +122,7 @@ impl Allocate<(Attribute, &Vec<glam::Vec4>)> for BufferObject {
                     );
                 }
             }
+            self
         }
     }
 }
