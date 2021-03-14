@@ -14,6 +14,7 @@ pub use opengl::Shader as Shader;
 pub use opengl::Attribute as VertexAttribute;
 pub use opengl::BufferObject as BufferObject;
 pub use opengl::Vao as Vao;
+pub use opengl::FrameBuffer as FrameBuffer;
 pub use opengl::Texture as Texture;
 pub use opengl::Utils as gl_utils;
 pub use opengl::WindowSettings as WindowSettings;
