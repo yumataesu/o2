@@ -24,6 +24,7 @@ pub struct App {
     num: usize,
     center: glam::Vec3,
     tex: framework::Texture,
+    fbo: framework::FrameBuffer
 }
 
 impl framework::BaseApp for App {
@@ -31,6 +32,12 @@ impl framework::BaseApp for App {
     fn setup(&mut self) {
         self.shader = framework::Shader::new();
         self.shader.load("data/shader/shader");
+
+
+        let mut t = framework::Texture::new();
+        t.allocate((1280, 720, gl::RGBA as i32));
+        self.fbo = framework::FrameBuffer::new();
+        self.fbo.allocate(t, gl::COLOR_ATTACHMENT0);
 
         self.num = 4;
         let prange = rand::distributions::Uniform::new(-1.0f32, 1.0);
@@ -46,18 +53,27 @@ impl framework::BaseApp for App {
             self.colors.push(glam::Vec4::new(crange.sample(&mut rng), crange.sample(&mut rng), crange.sample(&mut rng), 1.0));
         }
 
-        self.positions.push(glam::Vec3::new(0.0, 0.0, 0.0));
-        self.positions.push(glam::Vec3::new(1.0, 0.0, 0.0));
+        self.positions.push(glam::Vec3::new(-1.0, -1.0, 0.0));
+        self.positions.push(glam::Vec3::new(1.0, -1.0, 0.0));
         self.positions.push(glam::Vec3::new(1.0, 1.0, 0.0));
-        self.positions.push(glam::Vec3::new(0.0, 1.0, 0.0));
+        self.positions.push(glam::Vec3::new(-1.0, 1.0, 0.0));
 
-        self.texcoords.push(glam::Vec2::new(0.0, 0.0));
-        self.texcoords.push(glam::Vec2::new(2.0, 0.0));
-        self.texcoords.push(glam::Vec2::new(1.0, 1.0));
         self.texcoords.push(glam::Vec2::new(0.0, 1.0));
+        self.texcoords.push(glam::Vec2::new(1.0, 1.0));
+        self.texcoords.push(glam::Vec2::new(1.0, 0.0));
+        self.texcoords.push(glam::Vec2::new(0.0, 0.0));
+
+        self.indices.push(0);
+        self.indices.push(1);
+        self.indices.push(2);
+        self.indices.push(0);
+        self.indices.push(3);
+        self.indices.push(2);
+
+        // int indices[] = {0, 1, 2, 0, 3, 2};
 
         self.tex = framework::Texture::new();
-        self.tex.load_image("data/te.jpg")
+        self.tex.load_image("data/ref.jpeg")
             .set_wrap_mode(gl::REPEAT, gl::REPEAT);
 
         self.position_vbo = framework::BufferObject::new();
@@ -69,14 +85,14 @@ impl framework::BaseApp for App {
         self.texcoord_vbo = framework::BufferObject::new();
         self.texcoord_vbo.allocate((framework::VertexAttribute::Texcoord, &self.texcoords));
 
-        //self.ebo = framework::BufferObject::new();
-        //self.ebo.allocate((framework::VertexAttribute::Index, &self.indices));
+        self.ebo = framework::BufferObject::new();
+        self.ebo.allocate((framework::VertexAttribute::Index, &self.indices));
 
         self.vao = framework::Vao::new();
         self.vao.set_vbo(&self.position_vbo);
         self.vao.set_vbo(&self.color_vbo);
         self.vao.set_vbo(&self.texcoord_vbo);
-        //self.vao.set_vbo(&self.ebo);
+        self.vao.set_vbo(&self.ebo);
     }
 
 
@@ -97,15 +113,16 @@ impl framework::BaseApp for App {
         framework::gl_utils::clear();
         self.shader.begin();
         self.shader.uniform_texture("u_src", self.tex.get());
-        self.vao.draw(gl::TRIANGLES);
+        // self.vao.draw(gl::TRIANGLES);
+        self.vao.draw_elements(gl::TRIANGLES);
         self.shader.end();
     }
 
 
     fn draw_gui(&mut self, ui: &imgui::Ui) {
-        ui.show_demo_window(&mut true);
-        let win = ui.window(imgui::im_str!("title"));
-        ui.slider_float(imgui::im_str!("u8 value"), &mut self.val, -1.0, 1.0).build();
+        // ui.show_demo_window(&mut true);
+        // let win = ui.window(imgui::im_str!("title"));
+        // ui.slider_float(imgui::im_str!("u8 value"), &mut self.val, -1.0, 1.0).build();
     }
 
 

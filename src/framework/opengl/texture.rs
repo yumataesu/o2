@@ -94,7 +94,29 @@ impl Texture {
         self
     }
 
+    pub fn bind(&self) {
+        unsafe {
+            gl::BindTexture(gl::TEXTURE_2D, self.id);
+        }
+    }
 
+    pub fn unbind(&self) {
+        unsafe {
+            gl::BindTexture(gl::TEXTURE_2D, 0);
+        }
+    }
+
+
+    pub fn get_width(&self) -> i32 {
+        self.width
+    }
+
+
+    pub fn get_height(&self) -> i32 {
+        self.height
+    }
+
+    
     pub fn get(&self) -> &gl::types::GLuint {
         &self.id
     }
