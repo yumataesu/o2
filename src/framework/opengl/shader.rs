@@ -18,6 +18,8 @@ out vec2 v_texcoord;
 
 void main() {
     gl_Position = projection * view * model * vec4(position, 1.0);
+    //gl_Position = vec4(position, 1.0);
+
     v_color = color;
     v_texcoord = texcoord;
 }
@@ -35,7 +37,6 @@ layout (location = 0) out vec4 FragColor;
 
 void main() {
     vec4 result = texture(u_src, v_texcoord);
-    result.a = 0.1;
     FragColor = result;
 }
 \0";
@@ -102,9 +103,10 @@ impl Shader {
         }
     }
 
-    pub fn uniform_mat4(&self, name: &str, mat: &glam::Mat4) {
+    pub fn uniform_mat4(&self, name: &CStr, mat: &glam::Mat4) {
         unsafe {
-            gl::UniformMatrix4fv(gl::GetUniformLocation(self.program, name.as_ptr() as *const i8), 1, gl::FALSE, mat.as_ref().as_ptr());
+            // println!(" : {}", gl::GetUniformLocation(self.program, name.as_ptr()));
+            gl::UniformMatrix4fv(gl::GetUniformLocation(self.program, name.as_ptr()), 1, gl::FALSE, mat.as_ref().as_ptr());
         }
     }
 

@@ -6,6 +6,15 @@ use framework::{Load, Allocate, Update};
 use rand::distributions::*;
 use glam::Vec3;
 use std::ffi::CStr;
+
+
+macro_rules! c_str {
+    ($literal:expr) => {
+        unsafe {CStr::from_bytes_with_nul_unchecked(concat!($literal, "\0").as_bytes()) }
+    }
+}
+
+
 #[derive(Debug, Default)]
 pub struct App {
     val: f32,
@@ -55,10 +64,13 @@ impl framework::BaseApp for App {
             self.colors.push(glam::Vec4::new(crange.sample(&mut rng), crange.sample(&mut rng), crange.sample(&mut rng), 1.0));
         }
 
-        self.positions.push(glam::Vec3::new(-1.0, -1.0, 0.0));
-        self.positions.push(glam::Vec3::new(1.0, -1.0, 0.0));
-        self.positions.push(glam::Vec3::new(1.0, 1.0, 0.0));
-        self.positions.push(glam::Vec3::new(-1.0, 1.0, 0.0));
+        let w = 1.6 / 2.0;
+        let h = 1.0 / 2.0;
+
+        self.positions.push(glam::Vec3::new(-w, -h, 0.0));
+        self.positions.push(glam::Vec3::new(w, -h, 0.0));
+        self.positions.push(glam::Vec3::new(w, h, 0.0));
+        self.positions.push(glam::Vec3::new(-w, h, 0.0));
 
         self.texcoords.push(glam::Vec2::new(0.0, 1.0));
         self.texcoords.push(glam::Vec2::new(1.0, 1.0));
@@ -72,6 +84,9 @@ impl framework::BaseApp for App {
         self.indices.push(3);
         self.indices.push(2);
 
+        self.cam_pos = glam::Vec3::new(5.0,0.0,10.0);
+        self.cam_lookat = glam::Vec3::new(0.0,0.0,0.0);
+        self.cam_fov = 60.0;
 
         self.tex = framework::Texture::new();
         // self.tex.load_image("../../data/test.jpeg");
@@ -118,7 +133,7 @@ impl framework::BaseApp for App {
     fn draw(&mut self) {
 
         //view mat
-        self.cam_pos = glam::vec3(0.0, 0.1, 0.2);
+        // self.cam_pos = glam::vec3(0.0, 0.1, 0.2);
         // glam::mat4(x_axis, y_axis, z_axis, w_axis)
         let f = (self.cam_lookat - self.cam_pos).normalize();
         let s = f.cross(glam::vec3(0.0,1.0,0.0)).normalize();
@@ -129,7 +144,9 @@ impl framework::BaseApp for App {
         let vz = glam::vec4(-f.x, -f.y, -f.z, f.dot(self.cam_pos));
         let vw = glam::vec4(0.0,0.0,0.0,1.0);
         let mut view = glam::mat4(vx, vy, vz, vw);
-        view = view.transpose();
+        //view = view.transpose();
+        let mut view = glam::Mat4::look_at_rh(self.cam_pos, self.cam_lookat, glam::vec3(0.0,1.0,0.0));
+
 
         //prj mat
         let near = 0.1;
@@ -141,23 +158,21 @@ impl framework::BaseApp for App {
         let pz = glam::vec4(0.0, 0.0, -(far + near) / (far - near), -1.0);
         let pw = glam::vec4(0.0, 0.0, -(2.0 * far * near) / (far - near), 0.0);
         let mut projection = glam::mat4(px, py, pz, pw);
-        projection = projection.transpose();
-
+        //projection = projection.transpose();
+        let mut projection = glam::Mat4::perspective_rh(self.cam_fov* (std::f32::consts::PI / 180.0), aspect, near, far);
 
 
         let model = glam::Mat4::IDENTITY;
-        //println!("{}", view);
+
+        //self.position_vbo.update(&self.positions);
 
         framework::gl_utils::clear_color(0.1, 0.1, 0.1, 0.1);
         framework::gl_utils::clear();
         self.shader.begin();
         self.shader.uniform_texture("u_src", self.tex.get());
-        self.shader.uniform_mat4("projection", &projection);
-        self.shader.uniform_mat4("view", &view);
-        self.shader.uniform_mat4("model", &model);
-
-
-        // CStr::from("ttttt");
+        self.shader.uniform_mat4(c_str!("projection"), &projection);
+        self.shader.uniform_mat4(c_str!("view"), &view);
+        self.shader.uniform_mat4(c_str!("model"), &model);
         // self.vao.draw(gl::TRIANGLES);
         self.vao.draw_elements(gl::TRIANGLES);
         self.shader.end();
@@ -167,7 +182,11 @@ impl framework::BaseApp for App {
     fn draw_gui(&mut self, ui: &imgui::Ui) {
         // ui.show_demo_window(&mut true);
         // let win = ui.window(imgui::im_str!("title"));
-        // ui.slider_float(imgui::im_str!("u8 value"), &mut self.val, -1.0, 1.0).build();
+        ui.slider_float(imgui::im_str!("Cam Fov"), &mut self.cam_fov, 20.0, 100.0).build();
+        ui.slider_float(imgui::im_str!("Cam Pos X"), &mut self.cam_pos.x, -10.0, 10.0).build();
+        ui.slider_float(imgui::im_str!("Cam Pos y"), &mut self.cam_pos.y, -10.0, 10.0).build();
+        ui.slider_float(imgui::im_str!("Cam Pos z"), &mut self.cam_pos.z, -10.0, 10.0).build();
+        // ui.slider_float3(imgui::im_str!("camera position"), &mut self.cam_pos.as_ref().as_ptr(), -1.0, 1.0);
     }
 
 
