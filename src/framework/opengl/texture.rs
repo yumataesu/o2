@@ -48,8 +48,8 @@ impl Texture {
 
 
     pub fn load_image(&mut self, path: &str) -> &mut Self {
-        let img = image::open(path).expect("Failed to load image");
-
+        let img = image::open(&std::path::Path::new(path)).expect("Failed to load image");
+        
         let size = img.dimensions();
         self.width = size.0 as i32;
         self.height = size.1 as i32;
@@ -57,11 +57,13 @@ impl Texture {
         
         unsafe {
             gl::BindTexture(gl::TEXTURE_2D, self.id);
-            gl::TexParameterf(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::LINEAR as f32);
-            gl::TexParameterf(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::LINEAR as f32);
-            gl::TexParameterf(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, gl::CLAMP_TO_EDGE as f32);
-            gl::TexParameterf(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, gl::CLAMP_TO_EDGE as f32);
-            gl::TexImage2D(gl::TEXTURE_2D, 0, gl::RGB as i32, self.width, self.height, 0, gl::RGB, gl::UNSIGNED_BYTE, &data[0] as *const u8 as *const _);
+            gl::TexParameterf(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, self.wrap_horizontal as f32);
+            gl::TexParameterf(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, self.wrap_vertical as f32);
+            // set texture filtering parameters
+            gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, self.min_filter as i32);
+            gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, self.mag_filter as i32);
+            gl::TexImage2D(gl::TEXTURE_2D, 0, gl::RGB as i32, self.width, self.height, 0, gl::RGB, gl::UNSIGNED_BYTE, data.as_ptr() as *const _);
+            gl::GenerateMipmap(gl::TEXTURE_2D);
             gl::BindTexture(gl::TEXTURE_2D, 0);
         }
         self

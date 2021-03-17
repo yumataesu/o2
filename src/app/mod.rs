@@ -5,7 +5,7 @@ use framework::{Load, Allocate, Update};
 
 use rand::distributions::*;
 use glam::Vec3;
-
+use std::ffi::CStr;
 #[derive(Debug, Default)]
 pub struct App {
     val: f32,
@@ -24,7 +24,11 @@ pub struct App {
     num: usize,
     center: glam::Vec3,
     tex: framework::Texture,
-    fbo: framework::FrameBuffer
+    fbo: framework::FrameBuffer,
+
+    cam_pos: glam::Vec3,
+    cam_lookat: glam::Vec3,
+    cam_fov: f32,
 }
 
 impl framework::BaseApp for App {
@@ -32,12 +36,10 @@ impl framework::BaseApp for App {
     fn setup(&mut self) {
         self.shader = framework::Shader::new();
         self.shader.load("data/shader/shader");
-
-
-        let mut t = framework::Texture::new();
-        t.allocate((1280, 720, gl::RGBA as i32));
-        self.fbo = framework::FrameBuffer::new();
-        self.fbo.allocate(t, gl::COLOR_ATTACHMENT0);
+        // let mut t = framework::Texture::new();
+        // t.allocate((1280, 720, gl::RGBA as i32));
+        // self.fbo = framework::FrameBuffer::new();
+        // self.fbo.allocate(t, gl::COLOR_ATTACHMENT0);
 
         self.num = 4;
         let prange = rand::distributions::Uniform::new(-1.0f32, 1.0);
@@ -48,8 +50,8 @@ impl framework::BaseApp for App {
         self.colors = Vec::with_capacity(self.num);
         for i in 0..self.num {
             //self.positions.push(glam::Vec3::new(prange.sample(&mut rng), prange.sample(&mut rng), 0.0));
-            self.vel.push(glam::Vec3::new(0.0, 0.0, 0.0));
-            self.acc.push(glam::Vec3::new(0.0, 0.0, 0.0));
+            //self.vel.push(glam::Vec3::new(0.0, 0.0, 0.0));
+            //self.acc.push(glam::Vec3::new(0.0, 0.0, 0.0));
             self.colors.push(glam::Vec4::new(crange.sample(&mut rng), crange.sample(&mut rng), crange.sample(&mut rng), 1.0));
         }
 
@@ -70,11 +72,11 @@ impl framework::BaseApp for App {
         self.indices.push(3);
         self.indices.push(2);
 
-        // int indices[] = {0, 1, 2, 0, 3, 2};
 
         self.tex = framework::Texture::new();
-        self.tex.load_image("data/ref.jpeg")
-            .set_wrap_mode(gl::REPEAT, gl::REPEAT);
+        // self.tex.load_image("../../data/test.jpeg");
+        self.tex.load_image("data/test.jpeg");
+        //     .set_wrap_mode(gl::REPEAT, gl::REPEAT);
 
         self.position_vbo = framework::BufferObject::new();
         self.position_vbo.allocate((framework::VertexAttribute::Position, &self.positions));
@@ -97,22 +99,65 @@ impl framework::BaseApp for App {
 
 
     fn update(&mut self) {
-        for i in 0..self.num {
-            self.acc[i] = glam::Vec3::new(0.0,0.0,0.0);
-            self.acc[i] = self.center - self.positions[i];
-            self.acc[i] = self.acc[i].normalize()* 0.1;
-            self.vel[i] += self.acc[i] * 0.001;
-            self.positions[i] += self.vel[i];
-        }
+        // for i in 0..self.num {
+        //     self.acc[i] = glam::Vec3::new(0.0,0.0,0.0);
+        //     self.acc[i] = self.center - self.positions[i];
+        //     self.acc[i] = self.acc[i].normalize()* 0.1;
+        //     self.vel[i] += self.acc[i] * 0.001;
+        //     self.positions[i] += self.vel[i];
+        // }
         //self.position_vbo.update(&self.positions);
+
+
+
+
+        
     }
 
 
     fn draw(&mut self) {
-        framework::gl_utils::clear_color(0.1, 0.1, 0.1, 1.0);
+
+        //view mat
+        self.cam_pos = glam::vec3(0.0, 0.1, 0.2);
+        // glam::mat4(x_axis, y_axis, z_axis, w_axis)
+        let f = (self.cam_lookat - self.cam_pos).normalize();
+        let s = f.cross(glam::vec3(0.0,1.0,0.0)).normalize();
+        let u = s.cross(f).normalize();
+
+        let vx = glam::vec4(s.x, s.y, s.z, -s.dot(self.cam_pos));
+        let vy = glam::vec4(u.x, u.y, u.z, -u.dot(self.cam_pos));
+        let vz = glam::vec4(-f.x, -f.y, -f.z, f.dot(self.cam_pos));
+        let vw = glam::vec4(0.0,0.0,0.0,1.0);
+        let mut view = glam::mat4(vx, vy, vz, vw);
+        view = view.transpose();
+
+        //prj mat
+        let near = 0.1;
+        let far = 1000.0;
+        let aspect = 1920.0 / 1080.0;
+        let tan_half = ((self.cam_fov * (std::f32::consts::PI / 180.0)) / 2.0).tan();
+        let px = glam::vec4(1.0 / (aspect * tan_half), 0.0, 0.0, 0.0);
+        let py = glam::vec4(0.0, 1.0 / tan_half, 0.0, 0.0);
+        let pz = glam::vec4(0.0, 0.0, -(far + near) / (far - near), -1.0);
+        let pw = glam::vec4(0.0, 0.0, -(2.0 * far * near) / (far - near), 0.0);
+        let mut projection = glam::mat4(px, py, pz, pw);
+        projection = projection.transpose();
+
+
+
+        let model = glam::Mat4::IDENTITY;
+        //println!("{}", view);
+
+        framework::gl_utils::clear_color(0.1, 0.1, 0.1, 0.1);
         framework::gl_utils::clear();
         self.shader.begin();
         self.shader.uniform_texture("u_src", self.tex.get());
+        self.shader.uniform_mat4("projection", &projection);
+        self.shader.uniform_mat4("view", &view);
+        self.shader.uniform_mat4("model", &model);
+
+
+        // CStr::from("ttttt");
         // self.vao.draw(gl::TRIANGLES);
         self.vao.draw_elements(gl::TRIANGLES);
         self.shader.end();
@@ -128,8 +173,8 @@ impl framework::BaseApp for App {
 
     fn key_pressed(&mut self, key: Key, modifiers: Modifiers) {
         // println!("key_pressed {:?}", key);
-        self.shader = framework::Shader::new();
-        self.shader.load("data/shader/shader");
+        //self.shader = framework::Shader::new();
+        //self.shader.load("data/shader/shader");
     }
 
     fn key_released(&mut self, key: Key, modifiers: Modifiers) {

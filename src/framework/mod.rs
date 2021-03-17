@@ -61,7 +61,7 @@ impl Runner {
             glfw::WindowMode::Windowed,
         )
         .expect("Failed to create window");
-
+        window.set_floating(true);
         window.make_current();
         window.set_all_polling(true);
 
@@ -93,16 +93,6 @@ impl Runner {
         while !self.window.should_close() {
             self.last_time = std::time::Instant::now();
             let millisec_at_fps = std::time::Duration::from_millis((1.0 / self.frame_rate.clone() * 1000.0) as u64);
-
-            self.app.update();
-            self.app.draw();
-
-            let ui = self.imgui_glfw.frame(&mut self.window, &mut self.imgui);
-            self.app.draw_gui(&ui);
-            self.imgui_glfw.draw(ui, &mut self.window);
-
-
-            self.window.swap_buffers();
 
             //event
             self.glfw.poll_events();
@@ -138,6 +128,19 @@ impl Runner {
                     _ => {}
                 }
             }
+            unsafe {
+                gl::ClearColor(0.0, 0.0, 0.0, 1.0);
+            }
+            self.app.update();
+            self.app.draw();
+
+            let ui = self.imgui_glfw.frame(&mut self.window, &mut self.imgui);
+            self.app.draw_gui(&ui);
+            self.imgui_glfw.draw(ui, &mut self.window);
+
+
+            self.window.swap_buffers();
+
 
             let duration = std::time::Instant::now().duration_since(self.last_time);
             if duration < millisec_at_fps {

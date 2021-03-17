@@ -1,5 +1,6 @@
 use super::traits::Load;
-
+use glam::Mat4;
+use std::ffi::{CString, CStr};
 const VS_SRC: &'static [u8] = b"
 #version 450
 
@@ -7,11 +8,16 @@ layout (location = 0) in vec3 position;
 layout (location = 1) in vec4 color;
 layout (location = 2) in vec2 texcoord;
 
+uniform mat4 projection;
+uniform mat4 view;
+uniform mat4 model;
+
+
 out vec4 v_color;
 out vec2 v_texcoord;
 
 void main() {
-    gl_Position = vec4(position, 1.0);
+    gl_Position = projection * view * model * vec4(position, 1.0);
     v_color = color;
     v_texcoord = texcoord;
 }
@@ -28,9 +34,9 @@ uniform sampler2D u_src;
 layout (location = 0) out vec4 FragColor;
 
 void main() {
-    FragColor = vec4(1, 1, 1, 1);
-    // FragColor = vec4(v_texcoord, 0, 1);
-    FragColor = texture(u_src, v_texcoord);
+    vec4 result = texture(u_src, v_texcoord);
+    result.a = 0.1;
+    FragColor = result;
 }
 \0";
 
@@ -44,10 +50,10 @@ pub struct Shader {
 
 impl Load<&str> for Shader {
     fn load(&mut self, path: &str) {
-        self.vertex_src = std::fs::read_to_string(format!("{}.vert", path).to_string())
-            .expect("Something went wrong reading the file");
-        self.fragment_src = std::fs::read_to_string(format!("{}.frag", path).to_string())
-            .expect("Something went wrong reading the file");
+        // self.vertex_src = std::fs::read_to_string(format!("{}.vert", path).to_string())
+        //     .expect("Something went wrong reading the file");
+        // self.fragment_src = std::fs::read_to_string(format!("{}.frag", path).to_string())
+        //     .expect("Something went wrong reading the file");
 
         self.load();
     }
@@ -55,10 +61,10 @@ impl Load<&str> for Shader {
 
 impl Load<(&str, &str)> for Shader {
     fn load(&mut self, path: (&str, &str)) {
-        self.vertex_src = std::fs::read_to_string(path.0)
-            .expect("Something went wrong reading the file");
-        self.fragment_src = std::fs::read_to_string(path.1)
-            .expect("Something went wrong reading the file");
+        // self.vertex_src = std::fs::read_to_string(path.0)
+        //     .expect("Something went wrong reading the file");
+        // self.fragment_src = std::fs::read_to_string(path.1)
+        //     .expect("Something went wrong reading the file");
             
         self.load();
     }
@@ -93,6 +99,12 @@ impl Shader {
     pub fn uniform_texture(&self, name: &str, id: &gl::types::GLuint) {
         unsafe {
             gl::BindTexture(gl::TEXTURE_2D, *id);
+        }
+    }
+
+    pub fn uniform_mat4(&self, name: &str, mat: &glam::Mat4) {
+        unsafe {
+            gl::UniformMatrix4fv(gl::GetUniformLocation(self.program, name.as_ptr() as *const i8), 1, gl::FALSE, mat.as_ref().as_ptr());
         }
     }
 
