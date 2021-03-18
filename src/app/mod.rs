@@ -4,16 +4,6 @@ use imgui_glfw_rs::imgui;
 use framework::{Load, Allocate, Update};
 
 use rand::distributions::*;
-use glam::Vec3;
-use std::ffi::CStr;
-
-
-macro_rules! c_str {
-    ($literal:expr) => {
-        unsafe {CStr::from_bytes_with_nul_unchecked(concat!($literal, "\0").as_bytes()) }
-    }
-}
-
 
 #[derive(Debug, Default)]
 pub struct App {
@@ -34,7 +24,6 @@ pub struct App {
     center: glam::Vec3,
     tex: framework::Texture,
     fbo: framework::FrameBuffer,
-
     cam_pos: glam::Vec3,
     cam_lookat: glam::Vec3,
     cam_fov: f32,
@@ -84,7 +73,7 @@ impl framework::BaseApp for App {
         self.indices.push(3);
         self.indices.push(2);
 
-        self.cam_pos = glam::Vec3::new(5.0,0.0,10.0);
+        self.cam_pos = glam::Vec3::new(0.0,0.0,1.0);
         self.cam_lookat = glam::Vec3::new(0.0,0.0,0.0);
         self.cam_fov = 60.0;
 
@@ -122,11 +111,6 @@ impl framework::BaseApp for App {
         //     self.positions[i] += self.vel[i];
         // }
         //self.position_vbo.update(&self.positions);
-
-
-
-
-        
     }
 
 
@@ -144,12 +128,12 @@ impl framework::BaseApp for App {
         let vz = glam::vec4(-f.x, -f.y, -f.z, f.dot(self.cam_pos));
         let vw = glam::vec4(0.0,0.0,0.0,1.0);
         let mut view = glam::mat4(vx, vy, vz, vw);
-        //view = view.transpose();
-        let mut view = glam::Mat4::look_at_rh(self.cam_pos, self.cam_lookat, glam::vec3(0.0,1.0,0.0));
-
+        view = view.transpose();
+        // println!("{}", view);
+        // println!("==============");
 
         //prj mat
-        let near = 0.1;
+        let near = 1.0;
         let far = 1000.0;
         let aspect = 1920.0 / 1080.0;
         let tan_half = ((self.cam_fov * (std::f32::consts::PI / 180.0)) / 2.0).tan();
@@ -158,21 +142,23 @@ impl framework::BaseApp for App {
         let pz = glam::vec4(0.0, 0.0, -(far + near) / (far - near), -1.0);
         let pw = glam::vec4(0.0, 0.0, -(2.0 * far * near) / (far - near), 0.0);
         let mut projection = glam::mat4(px, py, pz, pw);
-        //projection = projection.transpose();
-        let mut projection = glam::Mat4::perspective_rh(self.cam_fov* (std::f32::consts::PI / 180.0), aspect, near, far);
-
+        projection = projection.transpose();
+        //println!("{}", projection.transpose());
+        let mut projection = glam::Mat4::perspective_rh(self.cam_fov * (std::f32::consts::PI / 180.0), aspect, near, far);
+        //let mut view = glam::Mat4::look_at_rh(self.cam_pos, self.cam_lookat, glam::vec3(0.0,1.0,0.0));
+        //println!("{}", projection);
+        //println!("==============");
 
         let model = glam::Mat4::IDENTITY;
-
-        //self.position_vbo.update(&self.positions);
 
         framework::gl_utils::clear_color(0.1, 0.1, 0.1, 0.1);
         framework::gl_utils::clear();
         self.shader.begin();
         self.shader.uniform_texture("u_src", self.tex.get());
-        self.shader.uniform_mat4(c_str!("projection"), &projection);
-        self.shader.uniform_mat4(c_str!("view"), &view);
-        self.shader.uniform_mat4(c_str!("model"), &model);
+        self.shader.uniform_mat4("projection", &projection);
+        self.shader.uniform_mat4("view", &view);
+        self.shader.uniform_mat4("model", &model);
+
         // self.vao.draw(gl::TRIANGLES);
         self.vao.draw_elements(gl::TRIANGLES);
         self.shader.end();
