@@ -103,12 +103,76 @@ impl Shader {
         }
     }
 
-    pub fn uniform_mat4(&self, name: &CStr, mat: &glam::Mat4) {
+    pub fn uniform_1i(&self, name: &str, v: &i32) {
         unsafe {
-            // println!(" : {}", gl::GetUniformLocation(self.program, name.as_ptr()));
-            gl::UniformMatrix4fv(gl::GetUniformLocation(self.program, name.as_ptr()), 1, gl::FALSE, mat.as_ref().as_ptr());
+            let c_str = CString::new(name).unwrap();
+            gl::Uniform1i(gl::GetUniformLocation(self.program, c_str.as_ptr() as *const i8), v.clone());
         }
     }
+
+    pub fn uniform_2i(&self, name: &str, v: &glam::IVec2) {
+        unsafe {
+            let c_str = CString::new(name).unwrap();
+            gl::Uniform2i(gl::GetUniformLocation(self.program, c_str.as_ptr() as *const i8), v.x.clone(), v.y.clone());
+        }
+    }
+
+    pub fn uniform_3i(&self, name: &str, v: &glam::IVec3) {
+        unsafe {
+            let c_str = CString::new(name).unwrap();
+            gl::Uniform3i(gl::GetUniformLocation(self.program, c_str.as_ptr() as *const i8), v.x.clone(), v.y.clone(), v.z.clone());
+        }
+    }
+
+    pub fn uniform_4i(&self, name: &str, v: &glam::IVec4) {
+        unsafe {
+            let c_str = CString::new(name).unwrap();
+            gl::Uniform4i(gl::GetUniformLocation(self.program, c_str.as_ptr() as *const i8), v.x.clone(), v.y.clone(), v.z.clone(), v.w.clone());
+        }
+    }
+
+    pub fn uniform_1f(&self, name: &str, v: &f32) {
+        unsafe {
+            let c_str = CString::new(name).unwrap();
+            gl::Uniform1f(gl::GetUniformLocation(self.program, c_str.as_ptr() as *const i8), v.clone());
+        }
+    }
+
+    pub fn uniform_2f(&self, name: &str, v: &glam::Vec2) {
+        unsafe {
+            let c_str = CString::new(name).unwrap();
+            gl::Uniform2f(gl::GetUniformLocation(self.program, c_str.as_ptr() as *const i8), v.x.clone(), v.y.clone());
+        }
+    }
+
+    pub fn uniform_3f(&self, name: &str, v: &glam::Vec3) {
+        unsafe {
+            let c_str = CString::new(name).unwrap();
+            gl::Uniform3f(gl::GetUniformLocation(self.program, c_str.as_ptr() as *const i8), v.x.clone(), v.y.clone(), v.z.clone());
+        }
+    }
+
+    pub fn uniform_4f(&self, name: &str, v: &glam::Vec4) {
+        unsafe {
+            let c_str = CString::new(name).unwrap();
+            gl::Uniform4f(gl::GetUniformLocation(self.program, c_str.as_ptr() as *const i8), v.x.clone(), v.y.clone(), v.z.clone(), v.w.clone());
+        }
+    }
+
+    pub fn uniform_mat3(&self, name: &str, mat: &glam::Mat3) {
+        unsafe {
+            let c_str = CString::new(name).unwrap();
+            gl::UniformMatrix4fv(gl::GetUniformLocation(self.program, c_str.as_ptr() as *const i8), 1, gl::FALSE, mat.as_ref().as_ptr());
+        }
+    }
+
+    pub fn uniform_mat4(&self, name: &str, mat: &glam::Mat4) {
+        unsafe {
+            let c_str = CString::new(name).unwrap();
+            gl::UniformMatrix4fv(gl::GetUniformLocation(self.program, c_str.as_ptr() as *const i8), 1, gl::FALSE, mat.as_ref().as_ptr());
+        }
+    }
+
 
 
     fn load(&mut self) {
