@@ -51,22 +51,28 @@ pub struct Shader {
 
 impl Load<&str> for Shader {
     fn load(&mut self, path: &str) {
-        // self.vertex_src = std::fs::read_to_string(format!("{}.vert", path).to_string())
-        //     .expect("Something went wrong reading the file");
-        // self.fragment_src = std::fs::read_to_string(format!("{}.frag", path).to_string())
-        //     .expect("Something went wrong reading the file");
-
+        self.vertex_src = std::fs::read_to_string(format!("{}.vert", path).to_string())
+            .expect("Something went wrong reading the file");
+        self.fragment_src = std::fs::read_to_string(format!("{}.frag", path).to_string())
+            .expect("Something went wrong reading the file");
         self.load();
     }
 }
 
 impl Load<(&str, &str)> for Shader {
     fn load(&mut self, path: (&str, &str)) {
-        // self.vertex_src = std::fs::read_to_string(path.0)
-        //     .expect("Something went wrong reading the file");
-        // self.fragment_src = std::fs::read_to_string(path.1)
-        //     .expect("Something went wrong reading the file");
-            
+        self.vertex_src = std::fs::read_to_string(path.0)
+            .expect("Something went wrong reading the file");
+        self.fragment_src = std::fs::read_to_string(path.1)
+            .expect("Something went wrong reading the file");
+        self.load();
+    }
+}
+
+impl Load<(&[u8], &[u8])> for Shader {
+    fn load(&mut self, str_array: (&[u8], &[u8])) {
+        self.vertex_src = String::from_utf8(str_array.0.to_vec()).unwrap();
+        self.fragment_src = String::from_utf8(str_array.1.to_vec()).unwrap();
         self.load();
     }
 }
@@ -182,12 +188,12 @@ impl Shader {
         
         unsafe {
             let vs = gl::CreateShader(gl::VERTEX_SHADER);
-            gl::ShaderSource(vs, 1, [VS_SRC.as_ptr() as *const _].as_ptr(), std::ptr::null());
+            gl::ShaderSource(vs, 1, [self.vertex_src.as_ptr() as *const _].as_ptr(), std::ptr::null());
             gl::CompileShader(vs);
             self.check_compile_errors(vs, "vertex");
 
             let fs = gl::CreateShader(gl::FRAGMENT_SHADER);
-            gl::ShaderSource(fs, 1, [FS_SRC.as_ptr() as *const _].as_ptr(), std::ptr::null());
+            gl::ShaderSource(fs, 1, [self.fragment_src.as_ptr() as *const _].as_ptr(), std::ptr::null());
             gl::CompileShader(fs);
             self.check_compile_errors(fs, "fragment");
 

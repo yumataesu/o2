@@ -41,8 +41,6 @@ impl FrameBuffer {
 
     pub fn attach_texture(&mut self, texture: texture::Texture, attach_point: gl::types::GLenum) -> &mut Self {
 
-
-
         self
     }
 
@@ -65,7 +63,9 @@ impl FrameBuffer {
     }
 
     pub fn draw(&self) {
-
+        unsafe {
+            
+        }
     }
 
     pub fn get(&self) -> &gl::types::GLuint {

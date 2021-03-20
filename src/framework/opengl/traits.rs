@@ -10,3 +10,6 @@ pub trait Update<T> {
     fn update(&mut self, arg: T);
 }
 
+pub trait Draw<T> {
+    fn draw(&mut self, arg: T);
+}

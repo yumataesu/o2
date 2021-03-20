@@ -5,6 +5,49 @@ use framework::{Load, Allocate, Update};
 
 use rand::distributions::*;
 
+
+const VS_SRC: &[u8] = b"
+#version 450
+
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec4 color;
+layout (location = 2) in vec2 texcoord;
+
+uniform mat4 projection;
+uniform mat4 view;
+uniform mat4 model;
+
+
+out vec4 v_color;
+out vec2 v_texcoord;
+
+void main() {
+    gl_Position = projection * view * model * vec4(position, 1.0);
+    //gl_Position = vec4(position, 1.0);
+
+    v_color = color;
+    v_texcoord = texcoord;
+}
+\0";
+
+const FS_SRC: &[u8] = b"
+#version 450
+
+in vec4 v_color;
+in vec2 v_texcoord;
+
+uniform sampler2D u_src;
+
+layout (location = 0) out vec4 FragColor;
+
+void main() {
+    vec4 result = texture(u_src, v_texcoord);
+    FragColor = result;
+}
+\0";
+
+
+
 #[derive(Debug, Default)]
 pub struct App {
     val: f32,
@@ -33,11 +76,14 @@ impl framework::BaseApp for App {
 
     fn setup(&mut self) {
         self.shader = framework::Shader::new();
-        self.shader.load("data/shader/shader");
-        // let mut t = framework::Texture::new();
-        // t.allocate((1280, 720, gl::RGBA as i32));
-        // self.fbo = framework::FrameBuffer::new();
-        // self.fbo.allocate(t, gl::COLOR_ATTACHMENT0);
+        // self.shader.load("data/shader/shader");
+        self.shader.load((VS_SRC, FS_SRC));
+        
+        let mut t = framework::Texture::new();
+        t.allocate((1280, 720, gl::RGBA as i32));
+        self.fbo = framework::FrameBuffer::new();
+        self.fbo.allocate(t, gl::COLOR_ATTACHMENT0);
+
 
         self.num = 4;
         let prange = rand::distributions::Uniform::new(-1.0f32, 1.0);
@@ -150,7 +196,7 @@ impl framework::BaseApp for App {
         //println!("==============");
 
         let model = glam::Mat4::IDENTITY;
-
+        //self.fbo.begin();
         framework::gl_utils::clear_color(0.1, 0.1, 0.1, 0.1);
         framework::gl_utils::clear();
         self.shader.begin();
@@ -158,10 +204,14 @@ impl framework::BaseApp for App {
         self.shader.uniform_mat4("projection", &projection);
         self.shader.uniform_mat4("view", &view);
         self.shader.uniform_mat4("model", &model);
-
-        // self.vao.draw(gl::TRIANGLES);
+        // self.tex.bind();
         self.vao.draw_elements(gl::TRIANGLES);
+        // self.tex.unbind();
         self.shader.end();
+        //self.fbo.end();
+
+
+        //self.fbo.draw();
     }
 
 
