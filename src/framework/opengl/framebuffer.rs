@@ -1,3 +1,4 @@
+use super::traits::{Allocate, Update};
 use super::texture;
 // use super::traits::{Allocate, Update};
 #[derive(Debug, Default)]
@@ -5,6 +6,7 @@ pub struct FrameBuffer {
     id: gl::types::GLuint,
     width: i32,
     height: i32,
+    texture: texture::Texture
 }
 
 impl FrameBuffer {
@@ -12,21 +14,21 @@ impl FrameBuffer {
         unsafe {
             let mut id = std::mem::zeroed();
             gl::GenFramebuffers(1, &mut id);
-            FrameBuffer { id: id, width: 512, height:512 }
+            FrameBuffer { id: id, width: 512, height:512, texture: texture::Texture::new() }
         }
     }
 
-    pub fn allocate(&mut self, texture: texture::Texture, attach_point: gl::types::GLenum) -> &mut Self {
+    pub fn allocate(&mut self, attach_point: gl::types::GLenum) -> &mut Self {
         unsafe {
             gl::BindFramebuffer(gl::FRAMEBUFFER, self.id);
-            texture.bind();
-            gl::FramebufferTexture2D(gl::FRAMEBUFFER, attach_point, gl::TEXTURE_2D, *texture.get(), 0);
-            texture.unbind();
+            self.texture.allocate((1920, 1080, gl::RGBA as i32));
+
+            gl::FramebufferTexture2D(gl::FRAMEBUFFER, attach_point, gl::TEXTURE_2D, *self.texture.get(), 0);
 
             let mut rbo = 0;
             gl::GenRenderbuffers(1, &mut rbo);
             gl::BindRenderbuffer(gl::RENDERBUFFER, rbo);
-            gl::RenderbufferStorage(gl::RENDERBUFFER, gl::DEPTH24_STENCIL8, texture.get_width(), texture.get_height()); // use a single renderbuffer object for both a depth AND stencil buffer.
+            gl::RenderbufferStorage(gl::RENDERBUFFER, gl::DEPTH24_STENCIL8, self.texture.get_width(), self.texture.get_height()); // use a single renderbuffer object for both a depth AND stencil buffer.
             gl::FramebufferRenderbuffer(gl::FRAMEBUFFER, gl::DEPTH_STENCIL_ATTACHMENT, gl::RENDERBUFFER, rbo); // now actually attach it
             // now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
             if gl::CheckFramebufferStatus(gl::FRAMEBUFFER) != gl::FRAMEBUFFER_COMPLETE {
@@ -69,6 +71,6 @@ impl FrameBuffer {
     }
 
     pub fn get(&self) -> &gl::types::GLuint {
-        &self.id
+        &self.texture.get()
     }
 }

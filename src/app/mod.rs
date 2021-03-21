@@ -48,10 +48,47 @@ void main() {
 
 
 
+const VS_SRC2: &[u8] = b"
+#version 450
+
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec4 color;
+layout (location = 2) in vec2 texcoord;
+
+out vec4 v_color;
+out vec2 v_texcoord;
+
+void main() {
+    gl_Position = vec4(position, 1.0);
+    v_texcoord = texcoord;
+}
+\0";
+
+const FS_SRC2: &[u8] = b"
+#version 450
+
+in vec4 v_color;
+in vec2 v_texcoord;
+
+uniform sampler2D u_src;
+
+layout (location = 0) out vec4 FragColor;
+
+void main() {
+    vec4 result = texture(u_src, v_texcoord);
+    FragColor = result;
+}
+\0";
+
+
+
+
+
 #[derive(Debug, Default)]
 pub struct App {
     val: f32,
     shader: framework::Shader,
+    render_shader: framework::Shader,
     vao: framework::Vao,
     ebo: framework::BufferObject,
     position_vbo: framework::BufferObject,
@@ -78,11 +115,14 @@ impl framework::BaseApp for App {
         self.shader = framework::Shader::new();
         // self.shader.load("data/shader/shader");
         self.shader.load((VS_SRC, FS_SRC));
+
+        self.render_shader = framework::Shader::new();
+        self.render_shader.load((VS_SRC2, FS_SRC2));
         
         let mut t = framework::Texture::new();
         t.allocate((1280, 720, gl::RGBA as i32));
         self.fbo = framework::FrameBuffer::new();
-        self.fbo.allocate(t, gl::COLOR_ATTACHMENT0);
+        self.fbo.allocate(gl::COLOR_ATTACHMENT0);
 
 
         self.num = 4;
@@ -196,7 +236,7 @@ impl framework::BaseApp for App {
         //println!("==============");
 
         let model = glam::Mat4::IDENTITY;
-        //self.fbo.begin();
+        self.fbo.begin();
         framework::gl_utils::clear_color(0.1, 0.1, 0.1, 0.1);
         framework::gl_utils::clear();
         self.shader.begin();
@@ -204,14 +244,15 @@ impl framework::BaseApp for App {
         self.shader.uniform_mat4("projection", &projection);
         self.shader.uniform_mat4("view", &view);
         self.shader.uniform_mat4("model", &model);
-        // self.tex.bind();
         self.vao.draw_elements(gl::TRIANGLES);
-        // self.tex.unbind();
         self.shader.end();
-        //self.fbo.end();
+        self.fbo.end();
 
-
-        //self.fbo.draw();
+        
+        self.render_shader.begin();
+        self.shader.uniform_texture("u_src", self.fbo.get());
+        self.vao.draw_elements(gl::TRIANGLES);
+        self.render_shader.end();
     }
 
 
