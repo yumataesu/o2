@@ -6,7 +6,9 @@ pub struct FrameBuffer {
     id: gl::types::GLuint,
     width: i32,
     height: i32,
-    texture: texture::Texture
+    texture: texture::Texture,
+    // color_buffers: Vec<gl::types::GLuint>,
+    // textures: Vec<texture::Texture>
 }
 
 impl FrameBuffer {

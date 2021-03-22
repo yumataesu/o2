@@ -113,8 +113,7 @@ impl framework::BaseApp for App {
 
     fn setup(&mut self) {
         self.shader = framework::Shader::new();
-        // self.shader.load("data/shader/shader");
-        self.shader.load((VS_SRC, FS_SRC));
+        self.shader.load((VS_SRC, FS_SRC));// self.shader.load("data/shader/shader");
 
         self.render_shader = framework::Shader::new();
         self.render_shader.load((VS_SRC2, FS_SRC2));
@@ -236,7 +235,7 @@ impl framework::BaseApp for App {
         //println!("==============");
 
         let model = glam::Mat4::IDENTITY;
-        self.fbo.begin();
+        // self.fbo.begin();
         framework::gl_utils::clear_color(0.1, 0.1, 0.1, 0.1);
         framework::gl_utils::clear();
         self.shader.begin();
@@ -246,13 +245,13 @@ impl framework::BaseApp for App {
         self.shader.uniform_mat4("model", &model);
         self.vao.draw_elements(gl::TRIANGLES);
         self.shader.end();
-        self.fbo.end();
+        // self.fbo.end();
 
         
-        self.render_shader.begin();
-        self.shader.uniform_texture("u_src", self.fbo.get());
-        self.vao.draw_elements(gl::TRIANGLES);
-        self.render_shader.end();
+        // self.render_shader.begin();
+        // self.shader.uniform_texture("u_src", self.fbo.get());
+        // self.vao.draw_elements(gl::TRIANGLES);
+        // self.render_shader.end();
     }
 
 
