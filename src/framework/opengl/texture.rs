@@ -1,34 +1,6 @@
 use super::traits::{Allocate, Update};
 use image::{GenericImage};
 
-const VS_SRC: &'static [u8] = b"
-#version 450
-
-layout (location = 0) in vec3 position;
-layout (location = 2) in vec2 texcoord;
-
-out vec2 v_texcoord;
-
-void main() {
-    gl_Position = vec4(position, 1.0);
-    v_texcoord = texcoord;
-}
-\0";
-
-const FS_SRC: &'static [u8] = b"
-#version 450
-uniform sampler2D u_src;
-
-in vec2 v_texcoord;
-
-layout (location = 0) out vec4 FragColor;
-
-void main() {
-    vec4 result = texture(u_src, v_texcoord);
-    FragColor = result;
-}
-\0";
-
 #[derive(Debug, Default)]
 pub struct Texture {
     id: gl::types::GLuint,

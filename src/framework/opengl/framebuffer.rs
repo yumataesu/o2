@@ -23,7 +23,7 @@ impl FrameBuffer {
     pub fn allocate(&mut self, attach_point: gl::types::GLenum) -> &mut Self {
         unsafe {
             gl::BindFramebuffer(gl::FRAMEBUFFER, self.id);
-            self.texture.allocate((1920, 1080, gl::RGBA as i32));
+            self.texture.allocate((1920/2, 1080/2, gl::RGBA as i32));
 
             gl::FramebufferTexture2D(gl::FRAMEBUFFER, attach_point, gl::TEXTURE_2D, *self.texture.get(), 0);
 

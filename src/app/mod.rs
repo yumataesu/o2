@@ -17,13 +17,12 @@ uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model;
 
-
 out vec4 v_color;
 out vec2 v_texcoord;
 
 void main() {
     gl_Position = projection * view * model * vec4(position, 1.0);
-    //gl_Position = vec4(position, 1.0);
+    // gl_Position = vec4(position, 1.0);
 
     v_color = color;
     v_texcoord = texcoord;
@@ -43,6 +42,7 @@ layout (location = 0) out vec4 FragColor;
 void main() {
     vec4 result = texture(u_src, v_texcoord);
     FragColor = result;
+    // FragColor = vec4(v_texcoord, 1, 1);
 }
 \0";
 
@@ -107,6 +107,7 @@ pub struct App {
     cam_pos: glam::Vec3,
     cam_lookat: glam::Vec3,
     cam_fov: f32,
+    quad: framework::Vao
 }
 
 impl framework::BaseApp for App {
@@ -138,8 +139,8 @@ impl framework::BaseApp for App {
             self.colors.push(glam::Vec4::new(crange.sample(&mut rng), crange.sample(&mut rng), crange.sample(&mut rng), 1.0));
         }
 
-        let w = 1.6 / 2.0;
-        let h = 1.0 / 2.0;
+        let w = 1.0 / 1.0;
+        let h = 1.0 / 1.0;
 
         self.positions.push(glam::Vec3::new(-w, -h, 0.0));
         self.positions.push(glam::Vec3::new(w, -h, 0.0));
@@ -184,6 +185,9 @@ impl framework::BaseApp for App {
         self.vao.set_vbo(&self.color_vbo);
         self.vao.set_vbo(&self.texcoord_vbo);
         self.vao.set_vbo(&self.ebo);
+
+        self.quad = framework::Vao::new();
+        self.quad.create_quad();
     }
 
 
@@ -235,7 +239,7 @@ impl framework::BaseApp for App {
         //println!("==============");
 
         let model = glam::Mat4::IDENTITY;
-        // self.fbo.begin();
+        self.fbo.begin();
         framework::gl_utils::clear_color(0.1, 0.1, 0.1, 0.1);
         framework::gl_utils::clear();
         self.shader.begin();
@@ -245,13 +249,13 @@ impl framework::BaseApp for App {
         self.shader.uniform_mat4("model", &model);
         self.vao.draw_elements(gl::TRIANGLES);
         self.shader.end();
-        // self.fbo.end();
+        self.fbo.end();
 
-        
-        // self.render_shader.begin();
-        // self.shader.uniform_texture("u_src", self.fbo.get());
+        self.render_shader.begin();
+        self.render_shader.uniform_texture("u_src", self.fbo.get());
         // self.vao.draw_elements(gl::TRIANGLES);
-        // self.render_shader.end();
+        self.quad.draw_elements(gl::TRIANGLES);
+        self.render_shader.end();
     }
 
 
