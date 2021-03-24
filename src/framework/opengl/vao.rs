@@ -62,7 +62,7 @@ impl Vao {
     }
 
     
-    pub fn create_quad(&self) {
+    pub fn create_quad(&mut self) {
         let mut position_vbo = bufferobject::BufferObject::new();
         let mut texcoord_vbo = bufferobject::BufferObject::new();
         let mut ebo = bufferobject::BufferObject::new();
@@ -92,6 +92,10 @@ impl Vao {
         position_vbo.allocate((bufferobject::Attribute::Position, &positions));
         texcoord_vbo.allocate((bufferobject::Attribute::Texcoord, &texcoords));
         ebo.allocate((bufferobject::Attribute::Index, &indices));
+
+        self.set_vbo(&position_vbo);
+        self.set_vbo(&texcoord_vbo);
+        self.set_vbo(&ebo);
     }
 
 

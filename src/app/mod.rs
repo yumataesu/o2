@@ -119,10 +119,10 @@ impl framework::BaseApp for App {
         self.render_shader = framework::Shader::new();
         self.render_shader.load((VS_SRC2, FS_SRC2));
         
-        let mut t = framework::Texture::new();
-        t.allocate((1280, 720, gl::RGBA as i32));
+        // let mut t = framework::Texture::new();
+        // t.allocate((1280, 720, gl::RGBA as i32));
         self.fbo = framework::FrameBuffer::new();
-        self.fbo.allocate(gl::COLOR_ATTACHMENT0);
+        self.fbo.allocate((1280, 720, gl::RGBA as i32, gl::COLOR_ATTACHMENT0));
 
 
         self.num = 4;
