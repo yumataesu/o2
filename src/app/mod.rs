@@ -119,10 +119,10 @@ impl framework::BaseApp for App {
         self.render_shader = framework::Shader::new();
         self.render_shader.load((VS_SRC2, FS_SRC2));
         
-        // let mut t = framework::Texture::new();
-        // t.allocate((1280, 720, gl::RGBA as i32));
+        let mut t = framework::Texture::new();
+        t.allocate((1280, 720, gl::RGBA as i32));
         self.fbo = framework::FrameBuffer::new();
-        self.fbo.allocate((1280, 720, gl::RGBA as i32, gl::COLOR_ATTACHMENT0));
+        // self.fbo.allocate((1280, 720, gl::RGBA as i32, gl::COLOR_ATTACHMENT0));
 
 
         self.num = 4;
@@ -188,6 +188,8 @@ impl framework::BaseApp for App {
 
         self.quad = framework::Vao::new();
         self.quad.create_quad();
+
+        self.fbo.clear();
     }
 
 
@@ -239,7 +241,7 @@ impl framework::BaseApp for App {
         //println!("==============");
 
         let model = glam::Mat4::IDENTITY;
-        self.fbo.begin();
+        // self.fbo.begin();
         framework::gl_utils::clear_color(0.1, 0.1, 0.1, 0.1);
         framework::gl_utils::clear();
         self.shader.begin();
@@ -249,13 +251,13 @@ impl framework::BaseApp for App {
         self.shader.uniform_mat4("model", &model);
         self.vao.draw_elements(gl::TRIANGLES);
         self.shader.end();
-        self.fbo.end();
+        // self.fbo.end();
 
-        self.render_shader.begin();
-        self.render_shader.uniform_texture("u_src", self.fbo.get());
-        // self.vao.draw_elements(gl::TRIANGLES);
-        self.quad.draw_elements(gl::TRIANGLES);
-        self.render_shader.end();
+        // self.render_shader.begin();
+        // self.render_shader.uniform_texture("u_src", self.fbo.get());
+        // // self.vao.draw_elements(gl::TRIANGLES);
+        // self.quad.draw_elements(gl::TRIANGLES);
+        // self.render_shader.end();
     }
 
 

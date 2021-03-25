@@ -1,5 +1,4 @@
 use super::traits::{Allocate, Update};
-use glam::Vec3;
 
 #[derive(Debug, Copy, Clone)]
 pub enum Attribute {

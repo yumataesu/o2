@@ -33,6 +33,15 @@ impl Allocate<(i32, i32, i32)> for Texture {
     }
 }
 
+impl Allocate<(i32)> for Texture {
+    fn allocate(&mut self, args: (i32)) -> &mut Self {
+        unsafe {
+            // self.width = args.0;
+            self.allocate()
+        }
+    }
+}
+
 
 impl Texture {
     pub fn new() -> Texture {

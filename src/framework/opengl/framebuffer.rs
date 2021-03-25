@@ -1,13 +1,12 @@
-use super::traits::{Allocate, Update};
 use super::texture;
+use super::traits::{Allocate, Update};
 
 #[derive(Debug, Default)]
 pub struct FrameBuffer {
     id: gl::types::GLuint,
     width: i32,
     height: i32,
-    texture: texture::Texture,
-    color_buffers: Vec<gl::types::GLuint>,
+    // texture: texture::Texture,
     textures: Vec<texture::Texture>,
     is_allocated_rbo: bool
 }
@@ -21,11 +20,11 @@ impl Allocate<(i32, i32, i32, gl::types::GLenum)> for FrameBuffer {
             let internal_format = args.2;
             let attach_point = args.3;
 
-            let mut tex = texture::Texture::new();
-            tex.allocate((w, h, internal_format));
-            self.textures.push(tex);
+            let mut t = texture::Texture::new();
+            t.allocate((w, h, internal_format));
 
-            self.allocate(&mut self.textures[0], gl::COLOR_ATTACHMENT0)
+            // self.textures.push(t);
+            self.allocate(&mut t, gl::COLOR_ATTACHMENT0)
         }
     }
 }
@@ -36,7 +35,7 @@ impl FrameBuffer {
         unsafe {
             let mut id = std::mem::zeroed();
             gl::GenFramebuffers(1, &mut id);
-            FrameBuffer { id: id, width: 512, height:512, texture: texture::Texture::new(), color_buffers: Vec::new(), textures: Vec::new(), is_allocated_rbo: false}
+            FrameBuffer { id: id, width: 512, height:512, textures: Vec::new(), is_allocated_rbo: false}
         }
     }
 
@@ -65,10 +64,9 @@ impl FrameBuffer {
         self
     }
 
-    pub fn attach_texture(&mut self, texture: texture::Texture, attach_point: gl::types::GLenum) -> &mut Self {
-
-        self
-    }
+    // pub fn attach_texture(&mut self, texture: texture::Texture, attach_point: gl::types::GLenum) -> &mut Self {
+    //     self
+    // }
 
     pub fn clear(&self) {
         unsafe {
