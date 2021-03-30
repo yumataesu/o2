@@ -20,8 +20,8 @@ impl Vao {
 
     
     pub fn set_vbo(&mut self, vbo: &bufferobject::BufferObject) {
-        let mut num: i32;
-        let mut location: u32;
+        let num: i32;
+        let location: u32;
         self.num_vertex = vbo.get_num_verts();
         unsafe {
             gl::BindVertexArray(self.id);

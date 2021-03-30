@@ -122,7 +122,7 @@ impl framework::BaseApp for App {
         let mut t = framework::Texture::new();
         t.allocate((1280, 720, gl::RGBA as i32));
         self.fbo = framework::FrameBuffer::new();
-        // self.fbo.allocate((1280, 720, gl::RGBA as i32, gl::COLOR_ATTACHMENT0));
+        self.fbo.allocate((1280, 720, gl::RGBA as i32, gl::COLOR_ATTACHMENT0));
 
 
         self.num = 4;
@@ -235,7 +235,7 @@ impl framework::BaseApp for App {
         let mut projection = glam::mat4(px, py, pz, pw);
         projection = projection.transpose();
         //println!("{}", projection.transpose());
-        let mut projection = glam::Mat4::perspective_rh(self.cam_fov * (std::f32::consts::PI / 180.0), aspect, near, far);
+        let projection = glam::Mat4::perspective_rh(self.cam_fov * (std::f32::consts::PI / 180.0), aspect, near, far);
         //let mut view = glam::Mat4::look_at_rh(self.cam_pos, self.cam_lookat, glam::vec3(0.0,1.0,0.0));
         //println!("{}", projection);
         //println!("==============");

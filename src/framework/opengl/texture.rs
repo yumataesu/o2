@@ -24,21 +24,12 @@ https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml
 
 impl Allocate<(i32, i32, i32)> for Texture {
     fn allocate(&mut self, args: (i32, i32, i32)) -> &mut Self {
-        unsafe {
+        //unsafe {
             self.width = args.0;
             self.height = args.1;
             self.internal_format = args.2;
             self.allocate()
-        }
-    }
-}
-
-impl Allocate<(i32)> for Texture {
-    fn allocate(&mut self, args: (i32)) -> &mut Self {
-        unsafe {
-            // self.width = args.0;
-            self.allocate()
-        }
+        //}
     }
 }
 
