@@ -9,27 +9,22 @@ pub struct FrameBuffer {
     width: i32,
     height: i32,
     textures: Vec<Box<texture::Texture>>,
-    // names: Vec<String>,
-    // names_refcell: RefCell<String>,
     is_allocated_rbo: bool,
 }
 
-
 impl Allocate<(i32, i32, i32, gl::types::GLenum)> for FrameBuffer {
     fn allocate(&mut self, args: (i32, i32, i32, gl::types::GLenum)) -> &mut Self {
-        //unsafe {
-            let w = args.0;
-            let h = args.1;
-            let internal_format = args.2;
-            let attach_point = args.3;
+        let w = args.0;
+        let h = args.1;
+        let internal_format = args.2;
+        let attach_point = args.3;
 
-            let mut t = Box::new(texture::Texture::new());
-            t.allocate((w, h, internal_format));
-            self.textures.push(t);
-            self.allocate(attach_point)
+        let mut t = Box::new(texture::Texture::new());
+        t.allocate((w, h, internal_format));
+        self.textures.push(t);
+        self.allocate(attach_point)
     }
 }
-
 
 
 impl FrameBuffer {
@@ -47,7 +42,7 @@ impl FrameBuffer {
             gl::BindFramebuffer(gl::FRAMEBUFFER, self.id);
             gl::FramebufferTexture2D(gl::FRAMEBUFFER, attach_point, gl::TEXTURE_2D, *self.textures[idx].get(), 0);
 
-            if (!self.is_allocated_rbo) {
+            if !self.is_allocated_rbo {
                 let mut rbo = 0;
                 gl::GenRenderbuffers(1, &mut rbo);
                 gl::BindRenderbuffer(gl::RENDERBUFFER, rbo);
@@ -67,13 +62,9 @@ impl FrameBuffer {
         self
     }
 
-    // pub fn attach_texture(&mut self, texture: texture::Texture, attach_point: gl::types::GLenum) -> &mut Self {
-    //     self
-    // }
 
     pub fn clear(&self) {
         // unsafe {
-
         // }
     }
 

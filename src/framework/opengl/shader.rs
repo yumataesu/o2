@@ -1,78 +1,58 @@
 use super::traits::Load;
-use glam::Mat4;
+use std::fs::File;
+use std::io::Read;
 use std::ffi::{CString, CStr};
-const VS_SRC: &'static [u8] = b"
-#version 450
-
-layout (location = 0) in vec3 position;
-layout (location = 1) in vec4 color;
-layout (location = 2) in vec2 texcoord;
-
-uniform mat4 projection;
-uniform mat4 view;
-uniform mat4 model;
-
-
-out vec4 v_color;
-out vec2 v_texcoord;
-
-void main() {
-    gl_Position = projection * view * model * vec4(position, 1.0);
-    //gl_Position = vec4(position, 1.0);
-
-    v_color = color;
-    v_texcoord = texcoord;
-}
-\0";
-
-const FS_SRC: &'static [u8] = b"
-#version 450
-
-in vec4 v_color;
-in vec2 v_texcoord;
-
-uniform sampler2D u_src;
-
-layout (location = 0) out vec4 FragColor;
-
-void main() {
-    vec4 result = texture(u_src, v_texcoord);
-    FragColor = result;
-}
-\0";
-
-
 #[derive(Debug, Default)]
 pub struct Shader {
     program: gl::types::GLuint,
-    vertex_src: String,
-    fragment_src: String
+    vertex_src: CString,
+    fragment_src: CString
 }
 
-impl Load<&str> for Shader {
-    fn load(&mut self, path: &str) {
-        self.vertex_src = std::fs::read_to_string(format!("{}.vert", path).to_string())
-            .expect("Something went wrong reading the file");
-        self.fragment_src = std::fs::read_to_string(format!("{}.frag", path).to_string())
-            .expect("Something went wrong reading the file");
-        self.load();
-    }
-}
+// impl Load<&str> for Shader {
+//     fn load(&mut self, path: &str) {
+//         self.vertex_src = std::fs::read_to_string(format!("{}.vert", path).to_string())
+//             .expect("Something went wrong reading the file");
+//         self.fragment_src = std::fs::read_to_string(format!("{}.frag", path).to_string())
+//             .expect("Something went wrong reading the file");
+
+//         self.load();
+//     }
+// }
 
 impl Load<(&str, &str)> for Shader {
     fn load(&mut self, path: (&str, &str)) {
-        self.vertex_src = std::fs::read_to_string(path.0)
-            .expect("Something went wrong reading the file");
-        self.fragment_src = std::fs::read_to_string(path.1)
-            .expect("Something went wrong reading the file");
+        let vertexPath = path.0;
+        let fragmentPath = path.1;
+
+        let mut vShaderFile = File::open(vertexPath)
+            .unwrap_or_else(|_| panic!("Failed to open {}", vertexPath));
+        let mut fShaderFile = File::open(fragmentPath)
+            .unwrap_or_else(|_| panic!("Failed to open {}", fragmentPath));
+        let mut vertexCode = String::new();
+        let mut fragmentCode = String::new();
+        vShaderFile
+            .read_to_string(&mut vertexCode)
+            .expect("Failed to read vertex shader");
+        fShaderFile
+            .read_to_string(&mut fragmentCode)
+            .expect("Failed to read fragment shader");
+
+        self.vertex_src = CString::new(vertexCode.as_bytes()).unwrap();
+        self.fragment_src = CString::new(fragmentCode.as_bytes()).unwrap();
+
+        // self.vertex_src = std::fs::read_to_string(path.0)
+        //     .expect("Something went wrong reading the file");
+        // self.fragment_src = std::fs::read_to_string(path.1)
+        //     .expect("Something went wrong reading the file");
         self.load();
     }
 }
 
 impl Load<(&[u8], &[u8])> for Shader {
     fn load(&mut self, str_array: (&[u8], &[u8])) {
-        self.vertex_src = String::from_utf8(str_array.0.to_vec()).unwrap();
-        self.fragment_src = String::from_utf8(str_array.1.to_vec()).unwrap();
+        self.vertex_src = CString::new(str_array.0.to_vec()).unwrap();
+        self.fragment_src = CString::new(str_array.1.to_vec()).unwrap();
         self.load();
     }
 }
@@ -82,7 +62,7 @@ impl Shader {
         unsafe {
             let mut program = std::mem::zeroed();
             program = gl::CreateProgram();
-            Shader { program: program, vertex_src: String::new(), fragment_src: String::new() }
+            Shader { program: program, vertex_src: CString::new("").expect("CString::new failed"), fragment_src: CString::new("").expect("CString::new failed") }
         }
     }
 
@@ -188,21 +168,21 @@ impl Shader {
         
         unsafe {
             let vs = gl::CreateShader(gl::VERTEX_SHADER);
-            gl::ShaderSource(vs, 1, [self.vertex_src.as_ptr() as *const _].as_ptr(), std::ptr::null());
+            gl::ShaderSource(vs, 1, &self.vertex_src.as_ptr(), std::ptr::null());
             gl::CompileShader(vs);
-            self.check_compile_errors(vs, "vertex");
+            //self.check_compile_errors(vs, "vertex");
 
             let fs = gl::CreateShader(gl::FRAGMENT_SHADER);
-            gl::ShaderSource(fs, 1, [self.fragment_src.as_ptr() as *const _].as_ptr(), std::ptr::null());
+            gl::ShaderSource(fs, 1, &self.fragment_src.as_ptr(), std::ptr::null());
             gl::CompileShader(fs);
-            self.check_compile_errors(fs, "fragment");
+            //self.check_compile_errors(fs, "fragment");
 
             gl::AttachShader(self.program, vs);
             gl::AttachShader(self.program, fs);
             gl::LinkProgram(self.program);
 
             //check program
-            self.check_compile_errors(self.program, "PROGRAM");
+            //self.check_compile_errors(self.program, "PROGRAM");
 
             gl::DeleteShader(vs);
             gl::DeleteShader(fs);

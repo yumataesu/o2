@@ -5,7 +5,6 @@ use framework::{Load, Allocate, Update};
 
 use rand::distributions::*;
 
-
 const VS_SRC: &[u8] = b"
 #version 450
 
@@ -81,9 +80,6 @@ void main() {
 \0";
 
 
-
-
-
 #[derive(Debug, Default)]
 pub struct App {
     val: f32,
@@ -114,15 +110,14 @@ impl framework::BaseApp for App {
 
     fn setup(&mut self) {
         self.shader = framework::Shader::new();
-        self.shader.load((VS_SRC, FS_SRC));// self.shader.load("data/shader/shader");
+        //self.shader.load((VS_SRC, FS_SRC));
+        self.shader.load(("data/shader/shader.vert", "data/shader/shader.frag"));
 
-        self.render_shader = framework::Shader::new();
-        self.render_shader.load((VS_SRC2, FS_SRC2));
+        // self.render_shader = framework::Shader::new();
+        // self.render_shader.load((VS_SRC2, FS_SRC2));
         
-        let mut t = framework::Texture::new();
-        t.allocate((1280, 720, gl::RGBA as i32));
         self.fbo = framework::FrameBuffer::new();
-        self.fbo.allocate((1280, 720, gl::RGBA as i32, gl::COLOR_ATTACHMENT0));
+        self.fbo.allocate((1920, 1080, gl::RGBA as i32, gl::COLOR_ATTACHMENT0));
 
 
         self.num = 4;
@@ -240,7 +235,7 @@ impl framework::BaseApp for App {
         //println!("==============");
 
         let model = glam::Mat4::IDENTITY;
-        self.fbo.begin();
+        // self.fbo.begin();
         framework::gl_utils::clear_color(0.1, 0.1, 0.1, 0.1);
         framework::gl_utils::clear();
         self.shader.begin();
@@ -250,12 +245,12 @@ impl framework::BaseApp for App {
         self.shader.uniform_mat4("model", &model);
         self.vao.draw_elements(gl::TRIANGLES);
         self.shader.end();
-        self.fbo.end();
+        // self.fbo.end();
 
-        self.render_shader.begin();
-        self.render_shader.uniform_texture("u_src", self.fbo.get(0));
-        self.quad.draw_elements(gl::TRIANGLES);
-        self.render_shader.end();
+        // self.render_shader.begin();
+        // self.render_shader.uniform_texture("u_src", self.fbo.get(0));
+        // self.quad.draw_elements(gl::TRIANGLES);
+        // self.render_shader.end();
     }
 
 
