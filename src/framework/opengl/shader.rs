@@ -1,7 +1,8 @@
 use super::traits::Load;
 use std::fs::File;
 use std::io::Read;
-use std::ffi::{CString, CStr};
+use std::ffi::{CString};
+
 #[derive(Debug, Default)]
 pub struct Shader {
     program: gl::types::GLuint,
@@ -9,51 +10,33 @@ pub struct Shader {
     fragment_src: CString
 }
 
-// impl Load<&str> for Shader {
-//     fn load(&mut self, path: &str) {
-//         self.vertex_src = std::fs::read_to_string(format!("{}.vert", path).to_string())
-//             .expect("Something went wrong reading the file");
-//         self.fragment_src = std::fs::read_to_string(format!("{}.frag", path).to_string())
-//             .expect("Something went wrong reading the file");
-
-//         self.load();
-//     }
-// }
+impl Load<&str> for Shader {
+    fn load(&mut self, path: &str) {
+        let vs_path = &format!("{}.vert", path.clone());
+        let fs_path = &format!("{}.frag", path.clone());
+        self.vertex_src = self.load_to_cstr(vs_path);//CString::new(vs.as_bytes()).unwrap();
+        self.fragment_src = self.load_to_cstr(fs_path);
+        self.load();
+    }
+}
 
 impl Load<(&str, &str)> for Shader {
     fn load(&mut self, path: (&str, &str)) {
-        let vertexPath = path.0;
-        let fragmentPath = path.1;
-
-        let mut vShaderFile = File::open(vertexPath)
-            .unwrap_or_else(|_| panic!("Failed to open {}", vertexPath));
-        let mut fShaderFile = File::open(fragmentPath)
-            .unwrap_or_else(|_| panic!("Failed to open {}", fragmentPath));
-        let mut vertexCode = String::new();
-        let mut fragmentCode = String::new();
-        vShaderFile
-            .read_to_string(&mut vertexCode)
-            .expect("Failed to read vertex shader");
-        fShaderFile
-            .read_to_string(&mut fragmentCode)
-            .expect("Failed to read fragment shader");
-
-        self.vertex_src = CString::new(vertexCode.as_bytes()).unwrap();
-        self.fragment_src = CString::new(fragmentCode.as_bytes()).unwrap();
-
-        // self.vertex_src = std::fs::read_to_string(path.0)
-        //     .expect("Something went wrong reading the file");
-        // self.fragment_src = std::fs::read_to_string(path.1)
-        //     .expect("Something went wrong reading the file");
+        let vs_path = &format!("{}.vert", path.0.clone());
+        let fs_path = &format!("{}.frag", path.1.clone());
+        self.vertex_src = self.load_to_cstr(vs_path);//CString::new(vs.as_bytes()).unwrap();
+        self.fragment_src = self.load_to_cstr(fs_path);
         self.load();
     }
 }
 
 impl Load<(&[u8], &[u8])> for Shader {
     fn load(&mut self, str_array: (&[u8], &[u8])) {
-        self.vertex_src = CString::new(str_array.0.to_vec()).unwrap();
-        self.fragment_src = CString::new(str_array.1.to_vec()).unwrap();
-        self.load();
+        unsafe {
+            self.vertex_src = CString::from_vec_unchecked(str_array.0.to_vec());
+            self.fragment_src = CString::from_vec_unchecked(str_array.1.to_vec());
+            self.load();
+        }
     }
 }
 
@@ -162,33 +145,39 @@ impl Shader {
 
 
     fn load(&mut self) {
-        //println!("self.program {}", self.program);
-        //println!("self.vertex_src {}", self.vertex_src);
-        //println!("self.fragment {}", self.fragment_src);
-        
         unsafe {
             let vs = gl::CreateShader(gl::VERTEX_SHADER);
             gl::ShaderSource(vs, 1, &self.vertex_src.as_ptr(), std::ptr::null());
             gl::CompileShader(vs);
-            //self.check_compile_errors(vs, "vertex");
+            self.check_compile_errors(vs, "vertex");
 
             let fs = gl::CreateShader(gl::FRAGMENT_SHADER);
             gl::ShaderSource(fs, 1, &self.fragment_src.as_ptr(), std::ptr::null());
             gl::CompileShader(fs);
-            //self.check_compile_errors(fs, "fragment");
+            self.check_compile_errors(fs, "fragment");
 
             gl::AttachShader(self.program, vs);
             gl::AttachShader(self.program, fs);
             gl::LinkProgram(self.program);
 
             //check program
-            //self.check_compile_errors(self.program, "PROGRAM");
+            self.check_compile_errors(self.program, "PROGRAM");
 
             gl::DeleteShader(vs);
             gl::DeleteShader(fs);
         }
     }
 
+    fn load_to_cstr(&mut self, path: &str) -> CString {
+        let mut vs_file = File::open(path)
+            .unwrap_or_else(|_| panic!("Failed to open {}", path));
+
+        let mut shader = String::new();
+        vs_file.read_to_string(&mut shader)
+            .expect("Failed to read shader");
+
+        CString::new(shader.as_bytes()).unwrap()
+    }
 
     /// utility function for checking shader compilation/linking errors.
     /// https://github.com/bwasty/learn-opengl-rs/blob/master/src/shader.rs#L102
