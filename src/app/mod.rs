@@ -206,7 +206,6 @@ impl framework::BaseApp for App {
 
 
     fn draw(&mut self) {
-
         //view mat
         // self.cam_pos = glam::vec3(0.0, 0.1, 0.2);
         // glam::mat4(x_axis, y_axis, z_axis, w_axis)
@@ -241,7 +240,7 @@ impl framework::BaseApp for App {
         //println!("==============");
 
         let model = glam::Mat4::IDENTITY;
-        // self.fbo.begin();
+        self.fbo.begin();
         framework::gl_utils::clear_color(0.1, 0.1, 0.1, 0.1);
         framework::gl_utils::clear();
         self.shader.begin();
@@ -251,13 +250,12 @@ impl framework::BaseApp for App {
         self.shader.uniform_mat4("model", &model);
         self.vao.draw_elements(gl::TRIANGLES);
         self.shader.end();
-        // self.fbo.end();
+        self.fbo.end();
 
-        // self.render_shader.begin();
-        // self.render_shader.uniform_texture("u_src", self.fbo.get());
-        // // self.vao.draw_elements(gl::TRIANGLES);
-        // self.quad.draw_elements(gl::TRIANGLES);
-        // self.render_shader.end();
+        self.render_shader.begin();
+        self.render_shader.uniform_texture("u_src", self.fbo.get(0));
+        self.quad.draw_elements(gl::TRIANGLES);
+        self.render_shader.end();
     }
 
 
@@ -296,6 +294,6 @@ impl framework::BaseApp for App {
 
     fn cursor_moved(&mut self, x: f32, y: f32) {
         // println!("cursor_moved {}, {}", x, y);
-        self.center = glam::Vec3::new(x / 1920.0f32 * 2.0 - 1.0, 1.0 - (y / 1080.0f32 * 2.0 - 1.0), 0.0);
+        // self.center = glam::Vec3::new(x / 1920.0f32 * 2.0 - 1.0, 1.0 - (y / 1080.0f32 * 2.0 - 1.0), 0.0);
     }
 }
