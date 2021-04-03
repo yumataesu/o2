@@ -1,11 +1,15 @@
-use super::traits::{Allocate, Update};
+use super::{Load, traits::{Allocate, Update}};
 use image::{GenericImage};
-
+use super::utils;
+use super::shader;
+use super::vao;
 #[derive(Debug, Default)]
 pub struct Texture {
     id: gl::types::GLuint,
     width: i32,
     height: i32,
+    quad_shader: shader::Shader,
+    quad: vao::Vao,
     internal_format: gl::types::GLint,
     data_type: gl::types::GLuint,
     allocated: bool,
@@ -24,12 +28,10 @@ https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml
 
 impl Allocate<(i32, i32, i32)> for Texture {
     fn allocate(&mut self, args: (i32, i32, i32)) -> &mut Self {
-        //unsafe {
-            self.width = args.0;
-            self.height = args.1;
-            self.internal_format = args.2;
-            self.allocate()
-        //}
+        self.width = args.0;
+        self.height = args.1;
+        self.internal_format = args.2;
+        self.allocate()
     }
 }
 
@@ -39,7 +41,14 @@ impl Texture {
         unsafe {
             let mut id = std::mem::zeroed();
             gl::GenTextures(1, &mut id);
-            Texture{ id: id, width:0, height:0, internal_format: gl::RGBA as i32, data_type: gl::UNSIGNED_BYTE, allocated: false, wrap_horizontal: gl::CLAMP_TO_EDGE, wrap_vertical: gl::CLAMP_TO_EDGE, min_filter: gl::LINEAR, mag_filter:  gl::LINEAR}
+
+            let mut quad = vao::Vao::new();
+            quad.create_quad();
+
+            let mut quad_shader = shader::Shader::new();
+            quad_shader.load((utils::VS_QUAD, utils::FS_QUAD));
+
+            Texture{ id: id, width:0, height:0, quad_shader: quad_shader, quad: quad, internal_format: gl::RGBA as i32, data_type: gl::UNSIGNED_BYTE, allocated: false, wrap_horizontal: gl::CLAMP_TO_EDGE, wrap_vertical: gl::CLAMP_TO_EDGE, min_filter: gl::LINEAR, mag_filter:  gl::LINEAR}
         }
     }
 
@@ -118,6 +127,15 @@ impl Texture {
     
     pub fn get(&self) -> &gl::types::GLuint {
         &self.id
+    }
+
+    pub fn draw(&self) {
+        unsafe {
+            self.quad_shader.begin();
+            self.quad_shader.uniform_texture("u_src", self.get());
+            self.quad.draw_elements(gl::TRIANGLES);
+            self.quad_shader.end();
+        }
     }
 
 

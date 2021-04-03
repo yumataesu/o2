@@ -5,44 +5,10 @@ use framework::{Load, Allocate, Update};
 
 use rand::distributions::*;
 
-const VS_SRC2: &[u8] = b"
-#version 450
-
-layout (location = 0) in vec3 position;
-layout (location = 1) in vec4 color;
-layout (location = 2) in vec2 texcoord;
-
-out vec4 v_color;
-out vec2 v_texcoord;
-
-void main() {
-    gl_Position = vec4(position, 1.0);
-    v_texcoord = texcoord;
-}
-\0";
-
-const FS_SRC2: &[u8] = b"
-#version 450
-
-in vec4 v_color;
-in vec2 v_texcoord;
-
-uniform sampler2D u_src;
-
-layout (location = 0) out vec4 FragColor;
-
-void main() {
-    vec4 result = texture(u_src, v_texcoord);
-    FragColor = result;
-}
-\0";
-
-
 #[derive(Debug, Default)]
 pub struct App {
     val: f32,
     shader: framework::Shader,
-    render_shader: framework::Shader,
     vao: framework::Vao,
     ebo: framework::BufferObject,
     position_vbo: framework::BufferObject,
@@ -61,22 +27,16 @@ pub struct App {
     cam_pos: glam::Vec3,
     cam_lookat: glam::Vec3,
     cam_fov: f32,
-    quad: framework::Vao
 }
 
 impl framework::BaseApp for App {
 
     fn setup(&mut self) {
         self.shader = framework::Shader::new();
-        //self.shader.load((VS_SRC, FS_SRC));
         self.shader.load("data/shader/shader");
-
-        self.render_shader = framework::Shader::new();
-        self.render_shader.load((VS_SRC2, FS_SRC2));
         
         self.fbo = framework::FrameBuffer::new();
         self.fbo.allocate((1920, 1080, gl::RGBA as i32, gl::COLOR_ATTACHMENT0));
-
 
         self.num = 4;
         let prange = rand::distributions::Uniform::new(-1.0f32, 1.0);
@@ -117,7 +77,6 @@ impl framework::BaseApp for App {
         self.cam_fov = 60.0;
 
         self.tex = framework::Texture::new();
-        // self.tex.load_image("../../data/test.jpeg");
         self.tex.load_image("data/test.jpeg");
         //     .set_wrap_mode(gl::REPEAT, gl::REPEAT);
 
@@ -138,9 +97,6 @@ impl framework::BaseApp for App {
         self.vao.set_vbo(&self.color_vbo);
         self.vao.set_vbo(&self.texcoord_vbo);
         self.vao.set_vbo(&self.ebo);
-
-        self.quad = framework::Vao::new();
-        self.quad.create_quad();
 
         self.fbo.clear();
     }
@@ -205,10 +161,7 @@ impl framework::BaseApp for App {
         self.shader.end();
         self.fbo.end();
 
-        self.render_shader.begin();
-        self.render_shader.uniform_texture("u_src", self.fbo.get(0));
-        self.quad.draw_elements(gl::TRIANGLES);
-        self.render_shader.end();
+        self.fbo.draw(0);
     }
 
 

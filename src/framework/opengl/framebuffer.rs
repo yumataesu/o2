@@ -80,10 +80,10 @@ impl FrameBuffer {
         }
     }
 
-    pub fn draw(&self) {
-        // unsafe {
-            
-        // }
+    pub fn draw(&self, attachment_point: usize) {
+        unsafe {
+            self.textures[attachment_point].draw();
+        }
     }
 
     pub fn get(&self, attachment_point: usize) -> &gl::types::GLuint {
