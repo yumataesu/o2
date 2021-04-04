@@ -1,4 +1,4 @@
-use super::{Load, traits::{Allocate, Update}};
+use super::{Load, traits::{Allocate, New}};
 use image::{GenericImage};
 use super::utils;
 use super::shader;
@@ -26,6 +26,71 @@ https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml
    GL_DEPTH_COMPONENT GL_DEPTH_STENCIL GL_RED GL_RG GL_RGB GL_RGBA 
 */
 
+impl New<(i32, i32, i32)> for Texture {
+    fn new(args: (i32, i32, i32)) -> Self {
+        let width = args.0;
+        let height = args.1;
+        let internal_format = args.2;
+
+        unsafe {
+            let mut quad = vao::Vao::new();
+            quad.create_quad();
+            let mut quad_shader = shader::Shader::new();
+            quad_shader.load((utils::VS_QUAD, utils::FS_QUAD));
+
+            let mut id = std::mem::zeroed();
+            gl::GenTextures(1, &mut id);
+
+            gl::BindTexture(gl::TEXTURE_2D, id);
+            gl::TexParameterf(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::LINEAR as f32);
+            gl::TexParameterf(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::LINEAR as f32);
+            gl::TexParameterf(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, gl::CLAMP_TO_EDGE as f32);
+            gl::TexParameterf(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, gl::CLAMP_TO_EDGE as f32);
+            gl::TexImage2D(gl::TEXTURE_2D, 0, gl::RGB as i32, width, height, 0, gl::RGB, gl::UNSIGNED_BYTE, std::ptr::null());
+            gl::BindTexture(gl::TEXTURE_2D, 0);
+
+            Texture{ id: id, width:width, height:height, quad_shader: quad_shader, quad: quad, internal_format: gl::RGBA as i32, data_type: gl::UNSIGNED_BYTE, allocated: false, wrap_horizontal: gl::CLAMP_TO_EDGE, wrap_vertical: gl::CLAMP_TO_EDGE, min_filter: gl::LINEAR, mag_filter:  gl::LINEAR}
+        }
+    }
+}
+
+
+
+impl New<&str> for Texture {
+    fn new(args: &str) -> Self {
+
+        let path = args;
+        let img = image::open(&std::path::Path::new(path)).expect("Failed to load image");
+        
+        let size = img.dimensions();
+        let width = size.0 as i32;
+        let height = size.1 as i32;
+        let data = img.raw_pixels();
+
+        unsafe {
+            let mut quad = vao::Vao::new();
+            quad.create_quad();
+            let mut quad_shader = shader::Shader::new();
+            quad_shader.load((utils::VS_QUAD, utils::FS_QUAD));
+
+            let mut id = std::mem::zeroed();
+            gl::GenTextures(1, &mut id);
+            gl::BindTexture(gl::TEXTURE_2D, id);
+            gl::TexParameterf(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, gl::CLAMP_TO_EDGE as f32);
+            gl::TexParameterf(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, gl::CLAMP_TO_EDGE as f32);
+            // set texture filtering parameters
+            gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::LINEAR as i32);
+            gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::LINEAR as i32);
+            gl::TexImage2D(gl::TEXTURE_2D, 0, gl::RGB as i32, width, height, 0, gl::RGB, gl::UNSIGNED_BYTE, data.as_ptr() as *const _);
+            gl::GenerateMipmap(gl::TEXTURE_2D);
+            gl::BindTexture(gl::TEXTURE_2D, 0);
+
+            Texture{ id: id, width: width, height: height, quad_shader: quad_shader, quad: quad, internal_format: gl::RGBA as i32, data_type: gl::UNSIGNED_BYTE, allocated: false, wrap_horizontal: gl::CLAMP_TO_EDGE, wrap_vertical: gl::CLAMP_TO_EDGE, min_filter: gl::LINEAR, mag_filter:  gl::LINEAR}
+        }
+    }
+}
+
+
 impl Allocate<(i32, i32, i32)> for Texture {
     fn allocate(&mut self, args: (i32, i32, i32)) -> &mut Self {
         self.width = args.0;
@@ -37,23 +102,8 @@ impl Allocate<(i32, i32, i32)> for Texture {
 
 
 impl Texture {
-    pub fn new() -> Texture {
-        unsafe {
-            let mut id = std::mem::zeroed();
-            gl::GenTextures(1, &mut id);
 
-            let mut quad = vao::Vao::new();
-            quad.create_quad();
-
-            let mut quad_shader = shader::Shader::new();
-            quad_shader.load((utils::VS_QUAD, utils::FS_QUAD));
-
-            Texture{ id: id, width:0, height:0, quad_shader: quad_shader, quad: quad, internal_format: gl::RGBA as i32, data_type: gl::UNSIGNED_BYTE, allocated: false, wrap_horizontal: gl::CLAMP_TO_EDGE, wrap_vertical: gl::CLAMP_TO_EDGE, min_filter: gl::LINEAR, mag_filter:  gl::LINEAR}
-        }
-    }
-
-
-    pub fn load_image(&mut self, path: &str) -> &mut Self {
+    fn load_image(&mut self, path: &str) -> &mut Self {
         let img = image::open(&std::path::Path::new(path)).expect("Failed to load image");
         
         let size = img.dimensions();

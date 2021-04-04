@@ -8,6 +8,7 @@ pub use imgui_glfw_rs::glfw::{self, Context};
 use imgui_glfw_rs::imgui;
 use imgui_glfw_rs::ImguiGLFW;
 
+pub use opengl::New as New;
 pub use opengl::Load as Load;
 pub use opengl::Allocate as Allocate;
 pub use opengl::Update as Update;

@@ -1,7 +1,7 @@
 use crate::framework::{self};
 use imgui_glfw_rs::glfw::{Key, Modifiers, MouseButton};
 use imgui_glfw_rs::imgui;
-use framework::{Load, Allocate, Update};
+use framework::{Load, Allocate, New};
 
 use rand::distributions::*;
 
@@ -76,9 +76,7 @@ impl framework::BaseApp for App {
         self.cam_lookat = glam::Vec3::new(0.0,0.0,0.0);
         self.cam_fov = 60.0;
 
-        self.tex = framework::Texture::new();
-        self.tex.load_image("data/test.jpeg");
-        //     .set_wrap_mode(gl::REPEAT, gl::REPEAT);
+        self.tex = framework::Texture::new("data/test.jpeg");
 
         self.position_vbo = framework::BufferObject::new();
         self.position_vbo.allocate((framework::VertexAttribute::Position, &self.positions));

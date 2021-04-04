@@ -1,7 +1,7 @@
 use std::rc::Rc;
 use std::cell::RefCell;
 use super::texture;
-use super::traits::{Allocate, Update};
+use super::traits::{Allocate, New};
 
 #[derive(Debug, Default)]
 pub struct FrameBuffer {
@@ -19,8 +19,8 @@ impl Allocate<(i32, i32, i32, gl::types::GLenum)> for FrameBuffer {
         let internal_format = args.2;
         let attach_point = args.3;
 
-        let mut t = Box::new(texture::Texture::new());
-        t.allocate((w, h, internal_format));
+        let mut t = Box::new(texture::Texture::new((w, h, internal_format)));
+        // t.allocate((w, h, internal_format));
         self.textures.push(t);
         self.allocate(attach_point)
     }

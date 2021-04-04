@@ -7,9 +7,11 @@ mod texture;
 mod utils;
 mod settings;
 
+pub use traits::New as New;
 pub use traits::Load as Load;
 pub use traits::Allocate as Allocate;
 pub use traits::Update as Update;
+
 pub use shader::Shader as Shader;
 pub use bufferobject::BufferObject as BufferObject;
 pub use bufferobject::Attribute as Attribute;
