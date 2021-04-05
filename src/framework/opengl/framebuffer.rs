@@ -1,5 +1,3 @@
-use std::rc::Rc;
-use std::cell::RefCell;
 use super::texture;
 use super::traits::{Allocate, New};
 

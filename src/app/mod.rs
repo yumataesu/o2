@@ -5,6 +5,78 @@ use framework::{Load, Allocate, New};
 
 use rand::distributions::*;
 
+use std::mem;
+
+pub trait Subject<T: Clone> {
+    fn notify_observers(&self, args: &T);
+    fn register_observer(&mut self, args: Box<Observer<T>>) -> usize;
+    fn unregister_observer(&mut self, size: usize);
+}
+
+pub trait Observer<T: Clone> {
+    fn on_notify(&self, args: &T);
+}
+
+
+impl std::fmt::Debug for Observer {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}", "derp")
+    }
+}
+
+
+#[derive(Debug, Clone)]
+struct EventObject(usize);
+
+
+#[derive(Debug)]
+struct SubjectX {
+    observers: Vec<(bool, Box<Observer<EventObject>>)>,
+}
+
+impl SubjectX {
+    fn new() -> SubjectX
+    {
+        SubjectX {
+            observers: Vec::new(),
+        }
+    }
+}
+
+
+impl Subject<EventObject> for SubjectX {
+    fn notify_observers(&self, e: &EventObject)
+    {
+        for observer in self.observers.iter() {
+            if observer.0 {
+                observer.1.on_notify(e);
+            }
+        }
+    }
+
+    fn register_observer(&mut self, o: Box<Observer<EventObject>>) -> usize
+    {
+        self.observers.push((true, o));
+        self.observers.len() - 1
+    }
+
+    fn unregister_observer(&mut self, i: usize)
+    {
+        self.observers[i].0 = false
+    }
+}
+
+
+struct ObserverX(usize);
+impl Observer<EventObject> for ObserverX {
+    fn on_notify(&self, e: &EventObject)
+    {
+        println!("ObserverX {} Get {:?}", self.0, e);
+    }
+}
+
+
+
 #[derive(Debug, Default)]
 pub struct App {
     val: f32,
@@ -27,6 +99,7 @@ pub struct App {
     cam_pos: glam::Vec3,
     cam_lookat: glam::Vec3,
     cam_fov: f32,
+    subject: SubjectX
 }
 
 impl framework::BaseApp for App {
@@ -97,6 +170,11 @@ impl framework::BaseApp for App {
         self.vao.set_vbo(&self.ebo);
 
         self.fbo.clear();
+
+        let mut subject = SubjectX::new();
+        subject.register_observer(Box::new(ObserverX(1)));
+        subject.register_observer(Box::new(ObserverX(2)));
+        subject.register_observer(Box::new(ObserverX(3)));
     }
 
 
@@ -186,6 +264,7 @@ impl framework::BaseApp for App {
 
     fn mouse_pressed(&mut self, button: MouseButton) {
         // println!("mouse_pressed {:?}", button);
+        subject.notify_observers(&EventObject(100));
     }
 
     fn mouse_released(&mut self, button: MouseButton) {
