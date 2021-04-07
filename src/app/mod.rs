@@ -4,80 +4,87 @@ use imgui_glfw_rs::imgui;
 use framework::{Load, Allocate, New};
 
 use rand::distributions::*;
+use std::sync::{Arc, Mutex};
 
-use std::mem;
-
-pub trait Subject<T: Clone> {
-    fn notify_observers(&self, args: &T);
-    fn register_observer(&mut self, args: Box<Observer<T>>) -> usize;
-    fn unregister_observer(&mut self, size: usize);
+pub enum Error {
+    ErrorA,
+    ErrorB
 }
 
-pub trait Observer<T: Clone> {
-    fn on_notify(&self, args: &T);
+pub type GameResult<T = ()> = Result<T, Error>;
+
+#[derive(Default)]
+pub struct EventSystem {
+    wrapped_observers: Vec<Arc<Mutex<dyn Observer>>>,
 }
 
-
-impl std::fmt::Debug for Observer {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{}", "derp")
-    }
-}
-
-
-#[derive(Debug, Clone)]
-struct EventObject(usize);
-
-
-#[derive(Debug)]
-struct SubjectX {
-    observers: Vec<(bool, Box<Observer<EventObject>>)>,
-}
-
-impl SubjectX {
-    fn new() -> SubjectX
-    {
-        SubjectX {
-            observers: Vec::new(),
+impl EventSystem {
+    pub fn new() -> EventSystem {
+        EventSystem {
+            wrapped_observers: vec![],
         }
     }
+
+    pub fn notify(&self, event: GameEvent) {
+        for wrapped_observer in self.wrapped_observers.clone() {
+            let mut observer = wrapped_observer.lock().unwrap();
+            observer.on_notify(&event);
+        }
+    }
+
+    pub fn add_observer(&mut self, observer: Arc<Mutex<dyn Observer>>) {
+        self.wrapped_observers.push(observer);
+    }
 }
 
+pub enum GameEvent {
+    PlayerScored,
+    AiScored,
+}
 
-impl Subject<EventObject> for SubjectX {
-    fn notify_observers(&self, e: &EventObject)
-    {
-        for observer in self.observers.iter() {
-            if observer.0 {
-                observer.1.on_notify(e);
+pub trait Observer {
+    fn on_notify(&mut self, event: &GameEvent);
+}
+
+pub type WrappedScore = Arc<Mutex<Score>>;
+
+pub struct Score {
+    player: u8,
+    ai: u8,
+}
+
+impl Score {
+    pub fn new() -> GameResult<WrappedScore> {
+        Ok(Arc::new(Mutex::new(Score {player:0, ai:0})))
+    }
+}
+
+impl std::default::Default for Score {
+    fn default() -> Self {
+        Self { player: 0, ai:0 }
+    }
+}
+
+impl Observer for Score {
+    fn on_notify(&mut self, event: &GameEvent) {
+        match event {
+            GameEvent::PlayerScored => {
+                println!("PlayerScored");
+                self.player += 1;
+            }
+            GameEvent::AiScored => {
+                println!("AiScored");
+                self.ai += 1;
             }
         }
     }
-
-    fn register_observer(&mut self, o: Box<Observer<EventObject>>) -> usize
-    {
-        self.observers.push((true, o));
-        self.observers.len() - 1
-    }
-
-    fn unregister_observer(&mut self, i: usize)
-    {
-        self.observers[i].0 = false
-    }
-}
-
-
-struct ObserverX(usize);
-impl Observer<EventObject> for ObserverX {
-    fn on_notify(&self, e: &EventObject)
-    {
-        println!("ObserverX {} Get {:?}", self.0, e);
-    }
 }
 
 
 
-#[derive(Debug, Default)]
+
+
+#[derive(Default)]
 pub struct App {
     val: f32,
     shader: framework::Shader,
@@ -99,7 +106,8 @@ pub struct App {
     cam_pos: glam::Vec3,
     cam_lookat: glam::Vec3,
     cam_fov: f32,
-    subject: SubjectX
+    event_system: EventSystem,
+    // score: GameResult<WrappedScore>
 }
 
 impl framework::BaseApp for App {
@@ -171,10 +179,11 @@ impl framework::BaseApp for App {
 
         self.fbo.clear();
 
-        let mut subject = SubjectX::new();
-        subject.register_observer(Box::new(ObserverX(1)));
-        subject.register_observer(Box::new(ObserverX(2)));
-        subject.register_observer(Box::new(ObserverX(3)));
+        self.event_system = EventSystem::new();
+        // self.score = Score::new();
+        let score = Score::new();
+        // wrapped_score.clone()
+        self.event_system.add_observer(score.clone());
     }
 
 
@@ -264,7 +273,8 @@ impl framework::BaseApp for App {
 
     fn mouse_pressed(&mut self, button: MouseButton) {
         // println!("mouse_pressed {:?}", button);
-        subject.notify_observers(&EventObject(100));
+        println!("mouse_pressed");
+        self.event_system.notify(GameEvent::PlayerScored);
     }
 
     fn mouse_released(&mut self, button: MouseButton) {
