@@ -6,6 +6,7 @@ use framework::{Load, Allocate, New};
 use rand::distributions::*;
 use std::sync::{Arc, Mutex};
 
+#[derive(Debug, Clone)]
 pub enum Error {
     ErrorA,
     ErrorB
@@ -37,31 +38,29 @@ impl EventSystem {
     }
 }
 
-pub enum GameEvent {
-    PlayerScored,
-    AiScored,
-}
 
 pub trait Observer {
     fn on_notify(&mut self, event: &GameEvent);
 }
 
+
+pub enum GameEvent {
+    PlayerScored,
+    AiScored,
+}
+
+
 pub type WrappedScore = Arc<Mutex<Score>>;
 
+#[derive(Default)]
 pub struct Score {
     player: u8,
     ai: u8,
 }
 
 impl Score {
-    pub fn new() -> GameResult<WrappedScore> {
-        Ok(Arc::new(Mutex::new(Score {player:0, ai:0})))
-    }
-}
-
-impl std::default::Default for Score {
-    fn default() -> Self {
-        Self { player: 0, ai:0 }
+    pub fn new() -> GameResult<Arc<Mutex<Score>>> {
+        Ok(Arc::new(Mutex::new(Score{ player:0, ai:0 })))
     }
 }
 
@@ -70,11 +69,11 @@ impl Observer for Score {
         match event {
             GameEvent::PlayerScored => {
                 println!("PlayerScored");
-                self.player += 1;
+                // self.player += 1;
             }
             GameEvent::AiScored => {
                 println!("AiScored");
-                self.ai += 1;
+                // self.ai += 1;
             }
         }
     }
@@ -180,10 +179,8 @@ impl framework::BaseApp for App {
         self.fbo.clear();
 
         self.event_system = EventSystem::new();
-        // self.score = Score::new();
-        let score = Score::new();
-        // wrapped_score.clone()
-        self.event_system.add_observer(score.clone());
+        let wrapped_score = Score::new().unwrap();
+        self.event_system.add_observer(wrapped_score.clone());
     }
 
 
