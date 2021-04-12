@@ -4,83 +4,6 @@ use imgui_glfw_rs::imgui;
 use framework::{Load, Allocate, New};
 
 use rand::distributions::*;
-use std::sync::{Arc, Mutex};
-
-#[derive(Debug, Clone)]
-pub enum Error {
-    ErrorA,
-    ErrorB
-}
-
-pub type GameResult<T = ()> = Result<T, Error>;
-
-#[derive(Default)]
-pub struct EventSystem {
-    wrapped_observers: Vec<Arc<Mutex<dyn Observer>>>,
-}
-
-impl EventSystem {
-    pub fn new() -> EventSystem {
-        EventSystem {
-            wrapped_observers: vec![],
-        }
-    }
-
-    pub fn notify(&self, event: GameEvent) {
-        for wrapped_observer in self.wrapped_observers.clone() {
-            let mut observer = wrapped_observer.lock().unwrap();
-            observer.on_notify(&event);
-        }
-    }
-
-    pub fn add_observer(&mut self, observer: Arc<Mutex<dyn Observer>>) {
-        self.wrapped_observers.push(observer);
-    }
-}
-
-
-pub trait Observer {
-    fn on_notify(&mut self, event: &GameEvent);
-}
-
-
-pub enum GameEvent {
-    PlayerScored,
-    AiScored,
-}
-
-
-pub type WrappedScore = Arc<Mutex<Score>>;
-
-#[derive(Default)]
-pub struct Score {
-    player: u8,
-    ai: u8,
-}
-
-impl Score {
-    pub fn new() -> GameResult<Arc<Mutex<Score>>> {
-        Ok(Arc::new(Mutex::new(Score{ player:0, ai:0 })))
-    }
-}
-
-impl Observer for Score {
-    fn on_notify(&mut self, event: &GameEvent) {
-        match event {
-            GameEvent::PlayerScored => {
-                println!("PlayerScored");
-                // self.player += 1;
-            }
-            GameEvent::AiScored => {
-                println!("AiScored");
-                // self.ai += 1;
-            }
-        }
-    }
-}
-
-
-
 
 
 #[derive(Default)]
@@ -105,7 +28,7 @@ pub struct App {
     cam_pos: glam::Vec3,
     cam_lookat: glam::Vec3,
     cam_fov: f32,
-    event_system: EventSystem,
+    // event_system: EventSystem,
     // score: GameResult<WrappedScore>
 }
 
@@ -178,9 +101,9 @@ impl framework::BaseApp for App {
 
         self.fbo.clear();
 
-        self.event_system = EventSystem::new();
-        let wrapped_score = Score::new().unwrap();
-        self.event_system.add_observer(wrapped_score.clone());
+        // self.event_system = EventSystem::new();
+        // let mouse_event = MouseEventArgs::new().unwrap();
+        // self.event_system.add_observer(mouse_event.clone());
     }
 
 
@@ -271,7 +194,7 @@ impl framework::BaseApp for App {
     fn mouse_pressed(&mut self, button: MouseButton) {
         // println!("mouse_pressed {:?}", button);
         println!("mouse_pressed");
-        self.event_system.notify(GameEvent::PlayerScored);
+        // self.event_system.notify(Event::MouseEvent);
     }
 
     fn mouse_released(&mut self, button: MouseButton) {

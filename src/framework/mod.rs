@@ -3,6 +3,7 @@ mod opengl;
 mod macros;
 
 use gl;
+use std::sync::{Arc, Mutex};
 
 pub use imgui_glfw_rs::glfw::{self, Context};
 use imgui_glfw_rs::imgui;
@@ -22,6 +23,87 @@ pub use opengl::Utils as gl_utils;
 pub use opengl::WindowSettings as WindowSettings;
 
 use crate::app::App;
+
+
+#[derive(Debug, Clone)]
+pub enum Error {
+    ErrorA, ErrorB
+}
+
+pub type GameResult<T = ()> = Result<T, Error>;
+
+#[derive(Default)]
+pub struct EventSystem {
+    wrapped_observers: Vec<Arc<Mutex<dyn Observer>>>,
+}
+
+impl EventSystem {
+    pub fn new() -> EventSystem {
+        EventSystem {
+            wrapped_observers: vec![],
+        }
+    }
+
+    pub fn notify(&self, event: Event) {
+        for wrapped_observer in self.wrapped_observers.clone() {
+            let mut observer = wrapped_observer.lock().unwrap();
+            observer.on_notify(&event);
+        }
+    }
+
+    pub fn add_observer(&mut self, observer: Arc<Mutex<dyn Observer>>) {
+        self.wrapped_observers.push(observer);
+    }
+}
+
+
+pub trait Observer {
+    fn on_notify(&mut self, event: &Event);
+}
+
+
+pub enum Event {
+    MouseEvent,
+    KeyEvent,
+    ResizeEvent,
+    DropEvent
+}
+
+#[derive(Default)]
+pub struct MouseEventArgs {
+    mouse_button: u8,
+    mouse_position: glam::Vec2
+}
+
+impl MouseEventArgs {
+    pub fn new() -> GameResult<Arc<Mutex<MouseEventArgs>>> {
+        Ok(Arc::new(Mutex::new(MouseEventArgs{ mouse_button:0, mouse_position: glam::Vec2::new(0.0, 0.0) })))
+    }
+}
+
+impl Observer for MouseEventArgs {
+    fn on_notify(&mut self, event: &Event) {
+        match event {
+            Event::MouseEvent => {
+                println!("MouseEvent");
+                // self.player += 1;
+            },
+            Event::KeyEvent => {
+                println!("KeyEvent");
+                // self.ai += 1;
+            }
+            Event::ResizeEvent => {
+                println!("ResizeEvent");
+                // self.ai += 1;
+            },
+            Event::DropEvent => {
+                println!("DropEvent");
+                // self.ai += 1;
+            }
+        }
+    }
+}
+
 
 pub trait BaseApp {
     fn setup(&mut self);
@@ -46,7 +128,8 @@ pub struct Runner {
     frame_rate : f64,
     last_time: std::time::Instant,
     imgui: imgui::Context,
-    imgui_glfw: ImguiGLFW
+    imgui_glfw: ImguiGLFW,
+    event_system: EventSystem,
 }
 
 
@@ -75,6 +158,10 @@ impl Runner {
         let mut imgui = imgui::Context::create();
         let imgui_glfw = ImguiGLFW::new(&mut imgui, &mut window);
 
+        let mut event_system = EventSystem::new();
+        let mouse_event = MouseEventArgs::new().unwrap();
+        event_system.add_observer(mouse_event.clone());
+
         Runner { 
             app: app, 
             window: window, 
@@ -84,7 +171,8 @@ impl Runner {
             frame_rate: 60.0 as f64, 
             last_time: std::time::Instant::now(),
             imgui: imgui,
-            imgui_glfw: imgui_glfw
+            imgui_glfw: imgui_glfw,
+            event_system: event_system
         }
     }
 
@@ -104,6 +192,7 @@ impl Runner {
                     glfw::WindowEvent::Key(key, _, action, modifiers) => {
                         match action {
                             glfw::Action::Press => {
+                                self.event_system.notify(Event::MouseEvent);
                                 match key {
                                     glfw::Key::Escape => { self.window.set_should_close(true); },
                                     _ => { self.app.key_pressed(key, modifiers); }
