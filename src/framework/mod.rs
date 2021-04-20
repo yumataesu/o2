@@ -115,7 +115,9 @@ impl Runner {
                     glfw::WindowEvent::Key(key, _, action, modifiers) => {
                         match action {
                             glfw::Action::Press => {
+                                
                                 self.event_system.notify(Event::MouseEvent);
+
                                 match key {
                                     glfw::Key::Escape => { self.window.set_should_close(true); },
                                     _ => { self.app.key_pressed(key, modifiers); }

@@ -1,5 +1,13 @@
 use std::sync::{Arc, Mutex};
 
+pub trait Notify<T> {
+    fn notify(&self, arg: T);
+}
+
+pub trait Observer<T> {
+    fn on_notify(&mut self, event: &T);
+}
+
 
 #[derive(Debug, Clone)]
 pub enum Error {
@@ -11,6 +19,14 @@ pub type GameResult<T = ()> = Result<T, Error>;
 #[derive(Default)]
 pub struct EventSystem {
     wrapped_observers: Vec<Arc<Mutex<dyn Observer>>>,
+}
+
+
+
+impl Notify<MouseEventArgs> for EventSystem {
+    fn notify(&self, arg: MouseEventArgs) {
+
+    }
 }
 
 impl EventSystem {
@@ -33,9 +49,7 @@ impl EventSystem {
 }
 
 
-pub trait Observer {
-    fn on_notify(&mut self, event: &Event);
-}
+
 
 
 pub enum Event {
