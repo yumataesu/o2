@@ -1,7 +1,7 @@
 use crate::framework::{self};
 use imgui_glfw_rs::glfw::{Key, Modifiers, MouseButton};
 use imgui_glfw_rs::imgui;
-use framework::{Load, Allocate, New};
+use framework::{Load, Allocate, New, Update};
 
 use rand::distributions::*;
 
@@ -41,7 +41,7 @@ impl framework::BaseApp for App {
         self.fbo = framework::FrameBuffer::new();
         self.fbo.allocate((1920, 1080, gl::RGBA as i32, gl::COLOR_ATTACHMENT0));
 
-        self.num = 4;
+        self.num = 400;
         let prange = rand::distributions::Uniform::new(-1.0f32, 1.0);
         let crange = rand::distributions::Uniform::new(0.0f32, 1.0);
         let mut rng = rand::thread_rng();
