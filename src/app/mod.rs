@@ -49,9 +49,9 @@ impl framework::BaseApp for App {
         self.positions = Vec::with_capacity(self.num);
         self.colors = Vec::with_capacity(self.num);
         for i in 0..self.num {
-            //self.positions.push(glam::Vec3::new(prange.sample(&mut rng), prange.sample(&mut rng), 0.0));
-            //self.vel.push(glam::Vec3::new(0.0, 0.0, 0.0));
-            //self.acc.push(glam::Vec3::new(0.0, 0.0, 0.0));
+            self.positions.push(glam::Vec3::new(prange.sample(&mut rng), prange.sample(&mut rng), 0.0));
+            self.vel.push(glam::Vec3::new(0.0, 0.0, 0.0));
+            self.acc.push(glam::Vec3::new(0.0, 0.0, 0.0));
             self.colors.push(glam::Vec4::new(crange.sample(&mut rng), crange.sample(&mut rng), crange.sample(&mut rng), 1.0));
         }
 
@@ -108,14 +108,15 @@ impl framework::BaseApp for App {
 
 
     fn update(&mut self) {
-        // for i in 0..self.num {
-        //     self.acc[i] = glam::Vec3::new(0.0,0.0,0.0);
-        //     self.acc[i] = self.center - self.positions[i];
-        //     self.acc[i] = self.acc[i].normalize()* 0.1;
-        //     self.vel[i] += self.acc[i] * 0.001;
-        //     self.positions[i] += self.vel[i];
-        // }
-        //self.position_vbo.update(&self.positions);
+        for i in 0..self.num {
+            self.acc[i] = glam::Vec3::new(0.0,0.0,0.0);
+            self.acc[i] = self.center - self.positions[i];
+            self.acc[i] = self.acc[i].normalize()* 0.1;
+            self.vel[i] += self.acc[i] * 0.001;
+            self.positions[i] += self.vel[i];
+        }
+        self.position_vbo.update((&self.positions));
+        // self.position_vbo.
     }
 
 
@@ -165,6 +166,8 @@ impl framework::BaseApp for App {
         self.vao.draw_elements(gl::TRIANGLES);
         self.shader.end();
         self.fbo.end();
+
+
 
         self.fbo.draw(0);
     }

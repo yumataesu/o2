@@ -127,7 +127,7 @@ impl Allocate<(Attribute, &Vec<glam::Vec4>)> for BufferObject {
 }
 
 
-impl Update<(&Vec<glam::Vec3>)> for BufferObject {
+impl Update<&Vec<glam::Vec3>> for BufferObject {
     fn update(&mut self, v: &Vec<glam::Vec3>) {
         unsafe {
             gl::NamedBufferSubData(self.id, 0, (v.len() * 3 * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr, v.as_ptr() as *const _);
@@ -136,7 +136,7 @@ impl Update<(&Vec<glam::Vec3>)> for BufferObject {
 }
 
 
-impl Update<(&Vec<glam::Vec4>)> for BufferObject {
+impl Update<&Vec<glam::Vec4>> for BufferObject {
     fn update(&mut self, v: &Vec<glam::Vec4>) {
         unsafe {
             gl::NamedBufferSubData(self.id, 0, (v.len() * 4 * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr, v.as_ptr() as *const _);

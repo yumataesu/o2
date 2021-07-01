@@ -22,9 +22,9 @@ pub use opengl::Texture as Texture;
 pub use opengl::Utils as gl_utils;
 pub use opengl::WindowSettings as WindowSettings;
 
-pub use event::EventSystem as EventSystem;
-pub use event::MouseEventArgs as MouseEventArgs;
-pub use event::Event as Event;
+// pub use event::EventSystem as EventSystem;
+// pub use event::MouseEventArgs as MouseEventArgs;
+// pub use event::Event as Event;
 
 use crate::app::App;
 
@@ -52,7 +52,7 @@ pub struct Runner {
     last_time: std::time::Instant,
     imgui: imgui::Context,
     imgui_glfw: ImguiGLFW,
-    event_system: EventSystem,
+    // event_system: EventSystem,
 }
 
 
@@ -81,9 +81,9 @@ impl Runner {
         let mut imgui = imgui::Context::create();
         let imgui_glfw = ImguiGLFW::new(&mut imgui, &mut window);
 
-        let mut event_system = EventSystem::new();
-        let mouse_event = MouseEventArgs::new().unwrap();
-        event_system.add_observer(mouse_event.clone());
+        // let mut event_system = EventSystem::new();
+        // let mouse_event = MouseEventArgs::new().unwrap();
+        // event_system.add_observer(mouse_event.clone());
 
         Runner { 
             app: app, 
@@ -95,7 +95,7 @@ impl Runner {
             last_time: std::time::Instant::now(),
             imgui: imgui,
             imgui_glfw: imgui_glfw,
-            event_system: event_system
+            // event_system: event_system
         }
     }
 
@@ -116,7 +116,7 @@ impl Runner {
                         match action {
                             glfw::Action::Press => {
                                 
-                                self.event_system.notify(Event::MouseEvent);
+                                // self.event_system.notify(Event::MouseEvent);
 
                                 match key {
                                     glfw::Key::Escape => { self.window.set_should_close(true); },
