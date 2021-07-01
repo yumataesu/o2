@@ -4,6 +4,8 @@ use imgui_glfw_rs::imgui;
 use framework::{Load, Allocate, New, Update};
 
 use rand::distributions::*;
+use noise::{NoiseFn, Perlin};
+
 
 
 #[derive(Default)]
@@ -28,6 +30,7 @@ pub struct App {
     cam_pos: glam::Vec3,
     cam_lookat: glam::Vec3,
     cam_fov: f32,
+    perlin: Perlin
     // event_system: EventSystem,
     // score: GameResult<WrappedScore>
 }
@@ -41,7 +44,7 @@ impl framework::BaseApp for App {
         self.fbo = framework::FrameBuffer::new();
         self.fbo.allocate((1920, 1080, gl::RGBA as i32, gl::COLOR_ATTACHMENT0));
 
-        self.num = 400;
+        self.num = 40000;
         let prange = rand::distributions::Uniform::new(-1.0f32, 1.0);
         let crange = rand::distributions::Uniform::new(0.0f32, 1.0);
         let mut rng = rand::thread_rng();
@@ -55,25 +58,25 @@ impl framework::BaseApp for App {
             self.colors.push(glam::Vec4::new(crange.sample(&mut rng), crange.sample(&mut rng), crange.sample(&mut rng), 1.0));
         }
 
-        let w = 1.0 / 1.0;
-        let h = 1.0 / 1.0;
+        // let w = 1.0 / 1.0;
+        // let h = 1.0 / 1.0;
 
-        self.positions.push(glam::Vec3::new(-w, -h, 0.0));
-        self.positions.push(glam::Vec3::new(w, -h, 0.0));
-        self.positions.push(glam::Vec3::new(w, h, 0.0));
-        self.positions.push(glam::Vec3::new(-w, h, 0.0));
+        // self.positions.push(glam::Vec3::new(-w, -h, 0.0));
+        // self.positions.push(glam::Vec3::new(w, -h, 0.0));
+        // self.positions.push(glam::Vec3::new(w, h, 0.0));
+        // self.positions.push(glam::Vec3::new(-w, h, 0.0));
 
-        self.texcoords.push(glam::Vec2::new(0.0, 1.0));
-        self.texcoords.push(glam::Vec2::new(1.0, 1.0));
-        self.texcoords.push(glam::Vec2::new(1.0, 0.0));
-        self.texcoords.push(glam::Vec2::new(0.0, 0.0));
+        // self.texcoords.push(glam::Vec2::new(0.0, 1.0));
+        // self.texcoords.push(glam::Vec2::new(1.0, 1.0));
+        // self.texcoords.push(glam::Vec2::new(1.0, 0.0));
+        // self.texcoords.push(glam::Vec2::new(0.0, 0.0));
 
-        self.indices.push(0);
-        self.indices.push(1);
-        self.indices.push(2);
-        self.indices.push(0);
-        self.indices.push(3);
-        self.indices.push(2);
+        // self.indices.push(0);
+        // self.indices.push(1);
+        // self.indices.push(2);
+        // self.indices.push(0);
+        // self.indices.push(3);
+        // self.indices.push(2);
 
         self.cam_pos = glam::Vec3::new(0.0,0.0,1.0);
         self.cam_lookat = glam::Vec3::new(0.0,0.0,0.0);
@@ -96,11 +99,11 @@ impl framework::BaseApp for App {
         self.vao = framework::Vao::new();
         self.vao.set_vbo(&self.position_vbo);
         self.vao.set_vbo(&self.color_vbo);
-        self.vao.set_vbo(&self.texcoord_vbo);
-        self.vao.set_vbo(&self.ebo);
+        // self.vao.set_vbo(&self.texcoord_vbo);
+        // self.vao.set_vbo(&self.ebo);
 
         self.fbo.clear();
-
+        self.perlin = Perlin::new();
         // self.event_system = EventSystem::new();
         // let mouse_event = MouseEventArgs::new().unwrap();
         // self.event_system.add_observer(mouse_event.clone());
@@ -108,12 +111,19 @@ impl framework::BaseApp for App {
 
 
     fn update(&mut self) {
+        
+        // let val = perlin.get([42.4, 37.7, 2.8]);
+
         for i in 0..self.num {
+            let x = self.perlin.get([self.positions[i].x as f64, self.positions[i].y as f64, 0.0 as f64]);
+            let y = self.perlin.get([self.positions[i].x as f64, self.positions[i].y as f64, 2.0 as f64]);
+
             self.acc[i] = glam::Vec3::new(0.0,0.0,0.0);
-            self.acc[i] = self.center - self.positions[i];
-            self.acc[i] = self.acc[i].normalize()* 0.1;
-            self.vel[i] += self.acc[i] * 0.001;
+            self.acc[i] = (self.center - self.positions[i]);
+            self.acc[i] = self.acc[i].normalize();
+            self.vel[i] += self.acc[i] * 0.01 * glam::Vec3::new(x as f32, y as f32, 0 as f32);
             self.positions[i] += self.vel[i];
+            //self.positions[i] = glam::Vec3::new(x as f32, y as f32, 0 as f32);
         }
         self.position_vbo.update((&self.positions));
         // self.position_vbo.
@@ -163,7 +173,7 @@ impl framework::BaseApp for App {
         self.shader.uniform_mat4("projection", &projection);
         self.shader.uniform_mat4("view", &view);
         self.shader.uniform_mat4("model", &model);
-        self.vao.draw_elements(gl::TRIANGLES);
+        self.vao.draw(gl::POINTS);
         self.shader.end();
         self.fbo.end();
 
@@ -197,6 +207,8 @@ impl framework::BaseApp for App {
     fn mouse_pressed(&mut self, button: MouseButton) {
         // println!("mouse_pressed {:?}", button);
         println!("mouse_pressed");
+        self.perlin = Perlin::new();
+        // self.perlin.s
         // self.event_system.notify(Event::MouseEvent);
     }
 

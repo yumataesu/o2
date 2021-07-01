@@ -23,6 +23,7 @@ impl Vao {
         let num: i32;
         let location: u32;
         self.num_vertex = vbo.get_num_verts();
+        println!("vbo.get_num_verts() {:?}", vbo.get_num_verts());
         unsafe {
             gl::BindVertexArray(self.id);
             match vbo.get_attribute() {
